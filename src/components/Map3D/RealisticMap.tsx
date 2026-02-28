@@ -3,7 +3,7 @@
 import { useRef, useState, useMemo, useEffect } from "react";
 import type { CameraPreset } from "@/types/camera";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, useCursor, Sky, Stars } from "@react-three/drei";
+import { OrbitControls, useCursor, Sky, Stars, Text } from "@react-three/drei";
 import * as THREE from "three";
 
 interface District {
