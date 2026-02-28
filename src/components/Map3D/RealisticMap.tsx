@@ -48,24 +48,36 @@ const REAL_LOCATIONS: Record<string, Array<{
   depth?: number;
 }>> = {
   gyeongbokgung: [
-    // 주요 전각 (크기와 위치를 실제 비율에 가깝게 조정)
-    { name: "근정전", lat: 37.5786, lng: 126.9770, type: "palace", height: 18, width: 35, depth: 25 },
-    { name: "광화문", lat: 37.5759, lng: 126.9769, type: "gate", height: 14, width: 40, depth: 15 },
+    // 주요 전각 (실제 조사한 치수 반영: 미터 단위)
+    // 근정전: 30m(W) x 21m(D) x 25m(H), 2단 월대 포함
+    { name: "근정전", lat: 37.5786, lng: 126.9770, type: "palace_double", height: 25, width: 30, depth: 21 },
+    // 광화문: 거대 석축 베이스 + 2층 누각
+    { name: "광화문", lat: 37.5759, lng: 126.9769, type: "gate_double", height: 18, width: 40, depth: 15 },
+    // 흥례문
     { name: "흥례문", lat: 37.5770, lng: 126.9770, type: "gate", height: 12, width: 30, depth: 12 },
+    // 근정문
     { name: "근정문", lat: 37.5779, lng: 126.9770, type: "gate", height: 11, width: 25, depth: 10 },
+    // 경회루: 34m(W) x 28m(D) x 21m(H), 연못 위 돌기둥 구조
+    { name: "경회루", lat: 37.5798, lng: 126.9752, type: "pavilion_water", height: 21, width: 34, depth: 28 },
+    // 사정전 (왕의 집무실)
     { name: "사정전", lat: 37.5796, lng: 126.9770, type: "palace", height: 13, width: 22, depth: 16 },
+    // 강녕전 (왕의 침전)
     { name: "강녕전", lat: 37.5805, lng: 126.9770, type: "palace", height: 12, width: 24, depth: 18 },
+    // 교태전 (왕비의 침전)
     { name: "교태전", lat: 37.5812, lng: 126.9770, type: "palace", height: 11, width: 22, depth: 16 },
-    { name: "경회루", lat: 37.5798, lng: 126.9752, type: "pavilion", height: 15, width: 32, depth: 24 },
+    // 수정전
     { name: "수정전", lat: 37.5788, lng: 126.9755, type: "palace", height: 10, width: 25, depth: 15 },
+    // 자경전
     { name: "자경전", lat: 37.5815, lng: 126.9785, type: "palace", height: 10, width: 20, depth: 15 },
-    { name: "향원정", lat: 37.5825, lng: 126.9773, type: "pavilion", height: 9, width: 10, depth: 10 },
+    // 향원정 (연못 위 육각형 정자)
+    { name: "향원정", lat: 37.5825, lng: 126.9773, type: "pavilion_hex", height: 9, width: 10, depth: 10 },
+    // 집옥재
     { name: "집옥재", lat: 37.5835, lng: 126.9765, type: "pavilion", height: 10, width: 18, depth: 12 },
-    // 행각 (회랑 - 중심축을 따라 배치)
-    { name: "근정전 서행각", lat: 37.5786, lng: 126.9760, type: "corridor", height: 6, width: 5, depth: 40 },
-    { name: "근정전 동행각", lat: 37.5786, lng: 126.9780, type: "corridor", height: 6, width: 5, depth: 40 },
-    // 주변 시설
-    { name: "민속박물관", lat: 37.5815, lng: 126.9800, type: "building", height: 20, width: 30, depth: 30 },
+    // 중심축 행각
+    { name: "서행각", lat: 37.5786, lng: 126.9760, type: "corridor", height: 6, width: 5, depth: 40 },
+    { name: "동행각", lat: 37.5786, lng: 126.9780, type: "corridor", height: 6, width: 5, depth: 40 },
+    // 국립민속박물관
+    { name: "민속박물관", lat: 37.5815, lng: 126.9800, type: "building", height: 25, width: 30, depth: 30 },
   ],
   itaewon: [
     // 주요 랜드마크
@@ -669,8 +681,12 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
 
     switch (type) {
       case "palace":
+      case "palace_double":
       case "gate":
+      case "gate_double":
       case "pavilion":
+      case "pavilion_water":
+      case "pavilion_hex":
         return { color: "#8B4513", roof: "#1a1a1a", isTraditional: true };
       case "corridor":
         return { color: "#a0522d", roof: "#2d2d2d", isTraditional: true };
@@ -698,9 +714,12 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
 
   // 전통 건물 (경복궁) - 화려한 전통 양식
   if (style.isTraditional) {
-    const isPalace = type === "palace";
-    const isGate = type === "gate";
-    const isPavilion = type === "pavilion";
+    const isPalace = type === "palace" || type === "palace_double";
+    const isDouble = type === "palace_double" || type === "gate_double";
+    const isGate = type === "gate" || type === "gate_double";
+    const isPavilion = type === "pavilion" || type === "pavilion_water" || type === "pavilion_hex";
+    const isWater = type === "pavilion_water";
+    const isHex = type === "pavilion_hex";
     const isCorridor = type === "corridor";
 
     // 단청 및 전통 색상 강화
@@ -713,21 +732,35 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
 
     return (
       <group position={position}>
-        {/* 2단 기단 (월대) */}
-        <mesh position={[0, 0.4, 0]} castShadow receiveShadow>
-          <boxGeometry args={[width + 4, 0.8, depth + 4]} />
-          <meshStandardMaterial color={stoneColor} />
-        </mesh>
-        <mesh position={[0, 1.2, 0]} castShadow receiveShadow>
-          <boxGeometry args={[width + 2, 0.8, depth + 2]} />
-          <meshStandardMaterial color="#a8a29e" />
-        </mesh>
-        {/* 기단 계단 */}
-        {!isCorridor && (
-          <mesh position={[0, 0.8, depth / 2 + 2.5]}>
-            <boxGeometry args={[width * 0.4, 1.6, 1.5]} />
-            <meshStandardMaterial color="#a8a29e" />
-          </mesh>
+        {/* 기단 (월대) - 물 위 정자는 돌기둥만, 나머지는 석축 베이스 */}
+        {isWater ? (
+          // 경회루 돌기둥
+          <group position={[0, 4, 0]}>
+            {Array.from({ length: 24 }).map((_, i) => (
+              <mesh key={i} position={[(i % 6 - 2.5) * (width / 5), -2, (Math.floor(i / 6) - 1.5) * (depth / 3)]}>
+                <boxGeometry args={[1.5, 8, 1.5]} />
+                <meshStandardMaterial color={stoneColor} />
+              </mesh>
+            ))}
+          </group>
+        ) : (
+          <>
+            <mesh position={[0, 0.4, 0]} castShadow receiveShadow>
+              <boxGeometry args={[width + 4, 0.8, depth + 4]} />
+              <meshStandardMaterial color={stoneColor} />
+            </mesh>
+            <mesh position={[0, 1.2, 0]} castShadow receiveShadow>
+              <boxGeometry args={[width + 2, 0.8, depth + 2]} />
+              <meshStandardMaterial color="#a8a29e" />
+            </mesh>
+            {/* 기단 계단 */}
+            {!isCorridor && (
+              <mesh position={[0, 0.8, depth / 2 + 2.5]}>
+                <boxGeometry args={[width * 0.4, 1.6, 1.5]} />
+                <meshStandardMaterial color="#a8a29e" />
+              </mesh>
+            )}
+          </>
         )}
 
         {/* 기둥들 (더 굵고 위엄 있게) */}
@@ -746,11 +779,27 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
           </group>
         ))}
 
-        {/* 본체 벽면 (따뜻한 석재 색상) */}
-        <mesh position={[0, height / 2 + 1.6, 0]} castShadow receiveShadow>
-          <boxGeometry args={[width - 0.4, height - 0.4, depth - 0.4]} />
+        {/* 본체 벽면 */}
+        <mesh position={[0, height / 2 + (isWater ? 8 : 1.6), 0]} castShadow receiveShadow>
+          <boxGeometry args={[isHex ? width * 0.8 : width - 0.4, height - 0.4, isHex ? depth * 0.8 : depth - 0.4]} />
           <meshStandardMaterial color="#d6d3d1" roughness={0.9} />
         </mesh>
+
+        {/* 2층 구조 (중층 건물) */}
+        {isDouble && (
+          <group position={[0, height + (isWater ? 8 : 1.6), 0]}>
+            {/* 1층과 2층 사이 처마 */}
+            <mesh position={[0, 0, 0]}>
+              <boxGeometry args={[width + 4, 0.6, depth + 3]} />
+              <meshStandardMaterial color={dancheongGreen} />
+            </mesh>
+            {/* 2층 몸체 */}
+            <mesh position={[0, height * 0.4, 0]} castShadow>
+              <boxGeometry args={[width * 0.7, height * 0.8, depth * 0.7]} />
+              <meshStandardMaterial color="#d6d3d1" />
+            </mesh>
+          </group>
+        )}
 
         {/* 문/창살 패턴 (어두운 나무) */}
         {!isCorridor && Array.from({ length: Math.floor(width / 4) }).map((_, i) => (
@@ -801,8 +850,8 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
           </group>
         ))}
 
-        {/* 기와 지붕 (더 짙은 색상) */}
-        <mesh position={[0, height + 2.8, 0]} castShadow>
+        {/* 지붕 */}
+        <mesh position={[0, (isDouble ? height * 1.5 : height) + (isWater ? 8 : 2.8), 0]} castShadow>
           <boxGeometry args={[width + 5, 1.8, depth + 4]} />
           <meshStandardMaterial color="#1c1917" roughness={0.8} />
         </mesh>
@@ -852,9 +901,9 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
         )}
 
         {/* 이름 라벨 */}
-        <Html position={[0, height + 7, 0]} center>
+        <Html position={[0, (isDouble ? height * 1.8 : height) + (isWater ? 12 : 10), 0]} center>
           <div className="bg-gradient-to-b from-amber-900/90 to-stone-900/90 px-3 py-1.5 rounded text-white text-xs whitespace-nowrap border border-yellow-600/50 shadow-lg">
-            <span className="text-yellow-500">🏯</span> {name}
+            <span className="text-yellow-500">{isWater ? "🌊" : "🏯"}</span> {name}
           </div>
         </Html>
       </group>
