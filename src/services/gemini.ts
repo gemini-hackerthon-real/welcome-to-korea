@@ -109,3 +109,20 @@ export function buildTexturePrompt(
     - Korean cultural elements where appropriate
   `.trim();
 }
+
+// 스크린샷 분석 (클라이언트 사이드)
+export async function analyzeScreenshot(
+  imageBase64: string
+): Promise<import("@/types/camera").AnalysisResult> {
+  const response = await fetch(`${API_BASE}/analyze`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ imageBase64 }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to analyze screenshot");
+  }
+
+  return response.json();
+}
