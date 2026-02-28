@@ -222,9 +222,6 @@ export default function RealisticMap({ district, onZoomOut, cameraPreset }: Real
 
         {/* 마스코트 */}
         <Mascot district={district} onDragChange={setIsDraggingMascot} />
-
-        {/* 좌표 표시 */}
-        <CoordinateInfo district={district} />
       </Canvas>
 
       {/* 줌 아웃 안내 */}
@@ -857,12 +854,7 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
           </>
         )}
 
-        {/* 이름 라벨 */}
-        <Html position={[0, (isDouble ? height * 1.8 : height) + (isWater ? 12 : 10), 0]} center>
-          <div className="bg-gradient-to-b from-amber-900/90 to-stone-900/90 px-3 py-1.5 rounded text-white text-xs whitespace-nowrap border border-yellow-600/50 shadow-lg">
-            <span className="text-yellow-500">{isWater ? "🌊" : "🏯"}</span> {name}
-          </div>
-        </Html>
+        {/* 이름 라벨 제거됨 */}
       </group>
     );
   }
@@ -998,12 +990,7 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
           <meshStandardMaterial color={accentColor} emissive={accentColor} emissiveIntensity={1} />
         </mesh>
 
-        {/* 이름 라벨 */}
-        <Html position={[0, height + 8, 0]} center>
-          <div className="bg-gradient-to-r from-blue-900/90 to-slate-900/90 px-3 py-1.5 rounded-lg text-white text-xs whitespace-nowrap border border-blue-400/30 shadow-lg backdrop-blur">
-            <span className="text-blue-400">🏢</span> {name}
-          </div>
-        </Html>
+        {/* 이름 라벨 제거됨 */}
       </group>
     );
   }
@@ -1130,19 +1117,7 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
         </mesh>
       </group>
 
-      {/* 이름 라벨 */}
-      <Html position={[0, height + 3, 0]} center>
-        <div 
-          className="px-2 py-1 rounded text-white text-xs whitespace-nowrap font-bold shadow-xl backdrop-blur-sm"
-          style={{
-            backgroundColor: style.isNeon ? 'rgba(255, 20, 147, 0.8)' : 'rgba(0,0,0,0.7)',
-            border: `1px solid ${style.color}`,
-            textShadow: style.isNeon ? '0 0 8px #FF1493' : 'none'
-          }}
-        >
-          {getEmojiForType(type)} {name}
-        </div>
-      </Html>
+      {/* 이름 라벨 제거됨 */}
     </group>
   );
 }
@@ -1408,17 +1383,7 @@ function BalloonCluster({ position, colors }: { position: [number, number, numbe
   );
 }
 
-function CoordinateInfo({ district }: { district: District }) {
-  const center = CENTER_COORDS[district.id as keyof typeof CENTER_COORDS];
-
-  return (
-    <Html position={[0, 0.5, -80]} center>
-      <div className="bg-black/60 px-3 py-1 rounded text-white text-xs">
-        중심 좌표: {center?.lat.toFixed(6)}, {center?.lng.toFixed(6)}
-      </div>
-    </Html>
-  );
-}
+// CoordinateInfo 제거됨
 
 // 홍대 NPC들 배치
 function HongdaeNPCs() {
