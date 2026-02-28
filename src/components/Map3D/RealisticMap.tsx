@@ -3,7 +3,7 @@
 import { useRef, useState, useMemo, useEffect } from "react";
 import type { CameraPreset } from "@/types/camera";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, Html, useCursor, Text, Sky, Stars } from "@react-three/drei";
+import { OrbitControls, useCursor, Sky, Stars } from "@react-three/drei";
 import * as THREE from "three";
 
 interface District {
@@ -766,22 +766,6 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
           <meshStandardMaterial color={wallTerracotta} roughness={0.8} />
         </mesh>
 
-        {/* 2층 구조 (중층 건물) */}
-        {isDouble && (
-          <group position={[0, height + (isWater ? 8 : 1.6), 0]}>
-            {/* 1층과 2층 사이 처마 */}
-            <mesh position={[0, 0, 0]}>
-              <boxGeometry args={[width + 4, 0.6, depth + 3]} />
-              <meshStandardMaterial color={dancheongGreen} />
-            </mesh>
-            {/* 2층 몸체 */}
-            <mesh position={[0, height * 0.4, 0]} castShadow>
-              <boxGeometry args={[width * 0.7, height * 0.8, depth * 0.7]} />
-              <meshStandardMaterial color="#d6d3d1" />
-            </mesh>
-          </group>
-        )}
-
         {/* 문/창살 패턴 (어두운 나무) */}
         {!isCorridor && Array.from({ length: Math.floor(width / 4) }).map((_, i) => (
           <mesh key={`door-${i}`} position={[-width / 2 + 2 + i * 4, height / 2 + (isWater ? 8 : 1), depth / 2 + 0.31]}>
@@ -854,12 +838,7 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
           </>
         )}
 
-        {/* 이름 라벨 */}
-        <Html position={[0, (isDouble ? height * 1.8 : height) + (isWater ? 12 : 10), 0]} center>
-          <div className="bg-gradient-to-b from-amber-900/90 to-stone-900/90 px-3 py-1.5 rounded text-white text-xs whitespace-nowrap border border-yellow-600/50 shadow-lg">
-            <span className="text-yellow-500">{isWater ? "🌊" : "🏯"}</span> {name}
-          </div>
-        </Html>
+        {/* 이름 라벨 제거됨 */}
       </group>
     );
   }
@@ -985,22 +964,7 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
           )}
         </group>
 
-        {/* 액센트 LED 라인 */}
-        <mesh position={[0, height + 2.5, depth / 2 + 0.2]}>
-          <boxGeometry args={[width + 0.5, 0.2, 0.1]} />
-          <meshStandardMaterial color={accentColor} emissive={accentColor} emissiveIntensity={1.5} />
-        </mesh>
-        <mesh position={[0, 3.2, depth / 2 + 1.15]}>
-          <boxGeometry args={[width + 2, 0.15, 0.1]} />
-          <meshStandardMaterial color={accentColor} emissive={accentColor} emissiveIntensity={1} />
-        </mesh>
-
-        {/* 이름 라벨 */}
-        <Html position={[0, height + 8, 0]} center>
-          <div className="bg-gradient-to-r from-blue-900/90 to-slate-900/90 px-3 py-1.5 rounded-lg text-white text-xs whitespace-nowrap border border-blue-400/30 shadow-lg backdrop-blur">
-            <span className="text-blue-400">🏢</span> {name}
-          </div>
-        </Html>
+        {/* 이름 라벨 제거됨 */}
       </group>
     );
   }
@@ -1034,21 +998,7 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
           distance={15}
         />
 
-        {/* 이름 라벨 - 항상 표시 */}
-        <Html position={[0, height + 3, 0]} center>
-          <div
-            className="px-2 py-1 rounded text-white text-xs whitespace-nowrap font-bold"
-            style={{
-              backgroundColor: 'rgba(0,0,0,0.8)',
-              borderColor: neonColor,
-              borderWidth: '1px',
-              borderStyle: 'solid',
-              textShadow: `0 0 10px ${neonColor}`
-            }}
-          >
-            🎵 {name}
-          </div>
-        </Html>
+        {/* 이름 라벨 제거됨 */}
       </group>
     );
   }
@@ -1127,19 +1077,7 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
         </mesh>
       </group>
 
-      {/* 이름 라벨 */}
-      <Html position={[0, height + 3, 0]} center>
-        <div 
-          className="px-2 py-1 rounded text-white text-xs whitespace-nowrap font-bold shadow-xl backdrop-blur-sm"
-          style={{
-            backgroundColor: style.isNeon ? 'rgba(255, 20, 147, 0.8)' : 'rgba(0,0,0,0.7)',
-            border: `1px solid ${style.color}`,
-            textShadow: style.isNeon ? '0 0 8px #FF1493' : 'none'
-          }}
-        >
-          {getEmojiForType(type)} {name}
-        </div>
-      </Html>
+      {/* 이름 라벨 제거됨 */}
     </group>
   );
 }
@@ -1404,6 +1342,8 @@ function BalloonCluster({ position, colors }: { position: [number, number, numbe
     </group>
   );
 }
+
+// CoordinateInfo 제거됨
 
 // 홍대 NPC들 배치
 function HongdaeNPCs() {
