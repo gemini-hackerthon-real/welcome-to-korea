@@ -173,7 +173,7 @@ export default function RealisticMap({ district, onZoomOut, cameraPreset }: Real
         shadows
       >
         <color attach="background" args={[getBackgroundColor(district.id)]} />
-        <fog attach="fog" args={[getBackgroundColor(district.id), 300, 1000]} />
+        <fog attach="fog" args={[getBackgroundColor(district.id), 250, 800]} />
 
         {/* 하늘 배경 */}
         {district.id !== "itaewon" ? (
@@ -488,34 +488,25 @@ function Ground({ district }: { district: District }) {
         </>
       )}
 
-      {/* 원경 산/언덕 (경복궁) - 북악산 배경 */}
+      {/* 원경 산/언덕 (경복궁) - 북악산 배경 (맨 뒤로 이동) */}
       {district.id === "gyeongbokgung" && (
-        <>
+        <group position={[0, 0, -250]} renderOrder={0}>
           {/* 북악산 (중앙, 멀리) */}
-          <mesh position={[0, 15, -120]}>
-            <coneGeometry args={[60, 40, 8]} />
-            <meshStandardMaterial color="#2d4a2a" />
+          <mesh position={[0, 40, -50]}>
+            <coneGeometry args={[120, 80, 8]} />
+            <meshStandardMaterial color="#1a2e1a" />
           </mesh>
           {/* 인왕산 (왼쪽) */}
-          <mesh position={[-80, 10, -110]}>
-            <coneGeometry args={[45, 30, 8]} />
-            <meshStandardMaterial color="#3d5c3a" />
+          <mesh position={[-150, 25, -20]}>
+            <coneGeometry args={[100, 60, 8]} />
+            <meshStandardMaterial color="#2d3e2d" />
           </mesh>
           {/* 낙산 (오른쪽) */}
-          <mesh position={[75, 8, -115]}>
-            <coneGeometry args={[40, 25, 8]} />
-            <meshStandardMaterial color="#4a6b47" />
+          <mesh position={[150, 20, -30]}>
+            <coneGeometry args={[90, 50, 8]} />
+            <meshStandardMaterial color="#2d3e2d" />
           </mesh>
-          {/* 추가 원경 산들 */}
-          <mesh position={[-40, 12, -130]}>
-            <coneGeometry args={[50, 35, 8]} />
-            <meshStandardMaterial color="#3a5437" />
-          </mesh>
-          <mesh position={[40, 10, -125]}>
-            <coneGeometry args={[45, 28, 8]} />
-            <meshStandardMaterial color="#2d4a2a" />
-          </mesh>
-        </>
+        </group>
       )}
     </group>
   );
@@ -634,7 +625,7 @@ function RealBuildings({ district }: { district: District }) {
   const scale = getScale(district.id);
 
   return (
-    <group>
+    <group renderOrder={100}>
       {locations.map((loc, i) => {
         const pos = latLngToMeters(loc.lat, loc.lng, center.lat, center.lng);
         const x = pos.x * scale;

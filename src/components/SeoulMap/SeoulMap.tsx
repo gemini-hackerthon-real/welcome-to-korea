@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, useRef, useEffect } from "react";
+import { useCallback, useState, useRef, useEffect, useMemo } from "react";
 import { GoogleMap, useJsApiLoader, Polygon } from "@react-google-maps/api";
 
 // 서울 중심 좌표
@@ -173,9 +173,12 @@ export default function SeoulMap({ onDistrictSelect, targetLocation }: SeoulMapP
   const mapRef = useRef<google.maps.Map | null>(null);
   const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const { isLoaded, loadError } = useJsApiLoader({
+  // 로더 옵션 메모이제이션
+  const loaderOptions = useMemo(() => ({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
-  });
+  }), []);
+
+  const { isLoaded, loadError } = useJsApiLoader(loaderOptions);
 
   // 현재 맵 중심에서 가장 가까운 지역 찾기
   const findNearestDistrict = useCallback((center: google.maps.LatLng) => {
