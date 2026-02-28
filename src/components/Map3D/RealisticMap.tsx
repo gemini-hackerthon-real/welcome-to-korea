@@ -11,6 +11,14 @@ interface District {
   color: string;
 }
 
+interface RealisticMapProps {
+  district: District;
+  onZoomOut?: () => void;
+}
+
+// 줌 아웃 임계값 - 이 이상 줌 아웃하면 지도로 전환
+const ZOOM_OUT_THRESHOLD = 180;
+
 // 실제 좌표 (위도/경도) → 3D 좌표 변환
 // 중심점 기준으로 미터 단위로 변환
 const CENTER_COORDS = {
@@ -145,7 +153,7 @@ const REAL_LOCATIONS: Record<string, Array<{
   ],
 };
 
-export default function RealisticMap({ district }: { district: District }) {
+export default function RealisticMap({ district, onZoomOut }: RealisticMapProps) {
   const [isDraggingMascot, setIsDraggingMascot] = useState(false);
 
   return (
@@ -187,13 +195,9 @@ export default function RealisticMap({ district }: { district: District }) {
           </>
         )}
 
-        <OrbitControls
-          maxPolarAngle={Math.PI / 2.2}
-          minPolarAngle={Math.PI / 8}
-          minDistance={30}
-          maxDistance={200}
+        <ZoomAwareControls
           enabled={!isDraggingMascot}
-          target={[0, 0, 0]}
+          onZoomOut={onZoomOut}
         />
 
         {/* 바닥 */}
@@ -232,7 +236,50 @@ export default function RealisticMap({ district }: { district: District }) {
           📍 {district.name} ({CENTER_COORDS[district.id as keyof typeof CENTER_COORDS]?.lat.toFixed(4)}, {CENTER_COORDS[district.id as keyof typeof CENTER_COORDS]?.lng.toFixed(4)})
         </div>
       </div>
+
+      {/* 줌 아웃 안내 */}
+      {onZoomOut && (
+        <div className="absolute bottom-4 left-4 bg-black/70 backdrop-blur px-4 py-2 rounded-lg text-white text-sm">
+          🔍 스크롤로 줌 아웃하면 지도로 돌아갑니다
+        </div>
+      )}
     </div>
+  );
+}
+
+// 줌 감지 OrbitControls
+function ZoomAwareControls({ enabled, onZoomOut }: { enabled: boolean; onZoomOut?: () => void }) {
+  const controlsRef = useRef<any>(null);
+  const { camera } = useThree();
+  const lastDistanceRef = useRef(0);
+  const transitionTriggeredRef = useRef(false);
+
+  useFrame(() => {
+    if (!controlsRef.current || !onZoomOut) return;
+
+    const distance = camera.position.length();
+
+    // 줌 아웃 감지 (거리가 증가하고 있고, 임계값 초과)
+    if (distance > ZOOM_OUT_THRESHOLD && !transitionTriggeredRef.current) {
+      if (distance > lastDistanceRef.current) {
+        transitionTriggeredRef.current = true;
+        onZoomOut();
+      }
+    }
+
+    lastDistanceRef.current = distance;
+  });
+
+  return (
+    <OrbitControls
+      ref={controlsRef}
+      maxPolarAngle={Math.PI / 2.2}
+      minPolarAngle={Math.PI / 8}
+      minDistance={30}
+      maxDistance={250}
+      enabled={enabled}
+      target={[0, 0, 0]}
+    />
   );
 }
 
@@ -562,7 +609,6 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
     const dancheongRed = "#b91c1c";
     const dancheongBlue = "#1e40af";
     const dancheongYellow = "#ca8a04";
-    const dancheongWhite = "#fef3c7";
 
     return (
       <group position={position}>
