@@ -3,7 +3,7 @@
 import { useRef, useState, useMemo, useEffect } from "react";
 import type { CameraPreset } from "@/types/camera";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, Html, useCursor, Text, Sky, Stars } from "@react-three/drei";
+import { OrbitControls, useCursor, Sky, Stars } from "@react-three/drei";
 import * as THREE from "three";
 
 interface District {
@@ -396,87 +396,6 @@ function Ground({ district }: { district: District }) {
       )}
 
       {/* 경복궁: 배경 산 (맨 뒤 배치) */}
-      {district.id === "gyeongbokgung" && (
-        <>
-          {/* 중앙 어도 (왕의 길) */}
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.4, 0]}>
-            <planeGeometry args={[4, 80]} />
-            <meshStandardMaterial color="#8B7355" />
-          </mesh>
-          {/* 잔디 영역 */}
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-35, -0.45, 0]}>
-            <planeGeometry args={[30, 60]} />
-            <meshStandardMaterial color="#4a7c39" />
-          </mesh>
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[35, -0.45, 0]}>
-            <planeGeometry args={[30, 60]} />
-            <meshStandardMaterial color="#4a7c39" />
-          </mesh>
-          {/* 연못 (경회루 앞) */}
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-15, -0.3, -10]}>
-            <circleGeometry args={[12, 32]} />
-            <meshStandardMaterial color="#4a90a4" transparent opacity={0.8} />
-          </mesh>
-        </>
-      )}
-
-      {/* 이태원: 네온 라인과 어두운 바닥 */}
-      {district.id === "itaewon" && (
-        <>
-          {/* 보도블록 패턴 */}
-          {Array.from({ length: 10 }).map((_, i) => (
-            <mesh key={`sidewalk-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[-50 + i * 12, -0.45, 0]}>
-              <planeGeometry args={[10, 80]} />
-              <meshStandardMaterial color={i % 2 === 0 ? "#252535" : "#1e1e2e"} />
-            </mesh>
-          ))}
-        </>
-      )}
-
-      {/* 홍대: 다채로운 바닥 패턴 */}
-      {district.id === "hongdae" && (
-        <>
-          {/* 걷고싶은거리 - 보도블록 패턴 */}
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.4, 0]}>
-            <planeGeometry args={[100, 40]} />
-            <meshStandardMaterial color="#d4a574" />
-          </mesh>
-          {/* 보도블록 그리드 라인 */}
-          {Array.from({ length: 10 }).map((_, i) => (
-            <mesh key={`grid-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.38, -20 + i * 4]}>
-              <planeGeometry args={[100, 0.1]} />
-              <meshStandardMaterial color="#b98a5a" />
-            </mesh>
-          ))}
-          {/* 버스킹존 원형 스테이지 */}
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-15, -0.35, -5]}>
-            <circleGeometry args={[10, 32]} />
-            <meshStandardMaterial color="#8b6914" />
-          </mesh>
-        </>
-      )}
-
-      {/* 강남: 격자형 도시 패턴 */}
-      {district.id === "gangnam" && (
-        <>
-          {/* 인도 */}
-          {Array.from({ length: 8 }).map((_, i) => (
-            <mesh key={`block-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[-42 + i * 12, -0.45, 0]}>
-              <planeGeometry args={[10, 80]} />
-              <meshStandardMaterial color={i % 2 === 0 ? "#3a3a3a" : "#2d2d2d"} />
-            </mesh>
-          ))}
-          {/* 횡단보도 */}
-          {Array.from({ length: 5 }).map((_, i) => (
-            <mesh key={`cross-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.35, -30 + i * 15]}>
-              <planeGeometry args={[12, 3]} />
-              <meshStandardMaterial color="#ffffff" />
-            </mesh>
-          ))}
-        </>
-      )}
-
-      {/* 원경 산/언덕 (경복궁) - 북악산 배경 (맨 뒤로 이동) */}
       {district.id === "gyeongbokgung" && (
         <group position={[0, 0, -250]} renderOrder={0}>
           {/* 북악산 (중앙, 멀리) */}
@@ -980,16 +899,6 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
           )}
         </group>
 
-        {/* 액센트 LED 라인 */}
-        <mesh position={[0, height + 2.5, depth / 2 + 0.2]}>
-          <boxGeometry args={[width + 0.5, 0.2, 0.1]} />
-          <meshStandardMaterial color={accentColor} emissive={accentColor} emissiveIntensity={1.5} />
-        </mesh>
-        <mesh position={[0, 3.2, depth / 2 + 1.15]}>
-          <boxGeometry args={[width + 2, 0.15, 0.1]} />
-          <meshStandardMaterial color={accentColor} emissive={accentColor} emissiveIntensity={1} />
-        </mesh>
-
         {/* 이름 라벨 제거됨 */}
       </group>
     );
@@ -1024,21 +933,7 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
           distance={15}
         />
 
-        {/* 이름 라벨 - 항상 표시 */}
-        <Html position={[0, height + 3, 0]} center>
-          <div
-            className="px-2 py-1 rounded text-white text-xs whitespace-nowrap font-bold"
-            style={{
-              backgroundColor: 'rgba(0,0,0,0.8)',
-              borderColor: neonColor,
-              borderWidth: '1px',
-              borderStyle: 'solid',
-              textShadow: `0 0 10px ${neonColor}`
-            }}
-          >
-            🎵 {name}
-          </div>
-        </Html>
+        {/* 이름 라벨 제거됨 */}
       </group>
     );
   }
@@ -1293,6 +1188,7 @@ function HongdaeDecorations() {
             <cylinderGeometry args={[0.08, 0.08, 0.8, 8]} />
             <meshStandardMaterial color="#333" />
           </mesh>
+          {/* 마이크 헤드 */}
           <mesh position={[0, 4.3, 0.5]}>
             <sphereGeometry args={[0.15, 8, 8]} />
             <meshStandardMaterial color="#aaa" metalness={1} />
