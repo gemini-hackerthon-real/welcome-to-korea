@@ -1594,7 +1594,7 @@ function Mascot({
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerLeave={onPointerUp}
-      scale={0.8}
+      scale={1.5}
       renderOrder={999}
     >
       <mesh visible={false}>
@@ -1623,33 +1623,83 @@ function Mascot({
         <meshStandardMaterial color="#FFE4B5" depthTest={false} transparent />
       </mesh>
 
-      {/* 홍대 스타일: 헤드폰 추가 */}
-      {district.id === "hongdae" && (
-        <group position={[0, 3.1, 0]}>
-          <mesh rotation={[0, 0, Math.PI / 2]}>
-            <torusGeometry args={[1.6, 0.2, 16, 32, Math.PI]} />
-            <meshStandardMaterial color="#333" />
+      {/* 경복궁: 갓 */}
+      {district.id === "gyeongbokgung" && (
+        <group position={[0, 4.2, 0]}>
+          <mesh>
+            <cylinderGeometry args={[0.8, 0.6, 0.8, 24]} />
+            <meshStandardMaterial color="#1C1C1C" />
           </mesh>
-          <mesh position={[-1.6, -0.3, 0]}>
-            <boxGeometry args={[0.5, 1, 0.8]} />
+          <mesh position={[0, -0.2, 0]}>
+            <cylinderGeometry args={[2.2, 2.2, 0.1, 24]} />
+            <meshStandardMaterial color="#1C1C1C" />
+          </mesh>
+        </group>
+      )}
+
+      {/* 홍대: 베레모 */}
+      {district.id === "hongdae" && (
+        <group position={[0, 4, 0.2]}>
+          <mesh rotation={[0.2, 0, 0.1]}>
+            <sphereGeometry args={[1.2, 24, 24, 0, Math.PI * 2, 0, Math.PI / 2]} />
             <meshStandardMaterial color="#FF1493" />
           </mesh>
-          <mesh position={[1.6, -0.3, 0]}>
-            <boxGeometry args={[0.5, 1, 0.8]} />
+          <mesh position={[0, 0.3, 0]}>
+            <sphereGeometry args={[0.15]} />
             <meshStandardMaterial color="#FF1493" />
           </mesh>
         </group>
       )}
 
-      {/* 눈 */}
-      <mesh position={[-0.5, 2.7, 1.2]}>
-        <sphereGeometry args={[0.2]} />
-        <meshStandardMaterial color="#000" depthTest={false} transparent />
-      </mesh>
-      <mesh position={[0.5, 2.7, 1.2]}>
-        <sphereGeometry args={[0.2]} />
-        <meshStandardMaterial color="#000" depthTest={false} transparent />
-      </mesh>
+      {/* 이태원: DJ 헤드폰 */}
+      {district.id === "itaewon" && (
+        <group position={[0, 3.1, 0]}>
+          <mesh rotation={[0, 0, Math.PI / 2]}>
+            <torusGeometry args={[1.6, 0.15, 16, 32, Math.PI]} />
+            <meshStandardMaterial color="#1C1C1C" metalness={0.8} roughness={0.2} depthTest={false} transparent />
+          </mesh>
+          <mesh position={[-1.6, -0.3, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[0.5, 0.5, 0.3, 24]} />
+            <meshStandardMaterial color="#00D4FF" emissive="#00D4FF" emissiveIntensity={0.5} depthTest={false} transparent />
+          </mesh>
+          <mesh position={[1.6, -0.3, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[0.5, 0.5, 0.3, 24]} />
+            <meshStandardMaterial color="#00D4FF" emissive="#00D4FF" emissiveIntensity={0.5} depthTest={false} transparent />
+          </mesh>
+        </group>
+      )}
+
+      {/* 강남: 선글라스 */}
+      {district.id === "gangnam" && (
+        <group position={[0, 2.9, 1.3]}>
+          <mesh>
+            <boxGeometry args={[2, 0.1, 0.1]} />
+            <meshStandardMaterial color="#1C1C1C" depthTest={false} transparent />
+          </mesh>
+          <mesh position={[-0.6, -0.15, 0]}>
+            <boxGeometry args={[0.7, 0.5, 0.1]} />
+            <meshStandardMaterial color="#1C1C1C" metalness={0.9} roughness={0.1} depthTest={false} transparent />
+          </mesh>
+          <mesh position={[0.6, -0.15, 0]}>
+            <boxGeometry args={[0.7, 0.5, 0.1]} />
+            <meshStandardMaterial color="#1C1C1C" metalness={0.9} roughness={0.1} depthTest={false} transparent />
+          </mesh>
+        </group>
+      )}
+
+      {/* 눈 (강남은 선글라스로 가림) */}
+      {district.id !== "gangnam" && (
+        <>
+          <mesh position={[-0.5, 2.7, 1.2]}>
+            <sphereGeometry args={[0.2]} />
+            <meshStandardMaterial color="#000" depthTest={false} transparent />
+          </mesh>
+          <mesh position={[0.5, 2.7, 1.2]}>
+            <sphereGeometry args={[0.2]} />
+            <meshStandardMaterial color="#000" depthTest={false} transparent />
+          </mesh>
+        </>
+      )}
 
       {/* 볼터치 */}
       <mesh position={[-1, 2.3, 1]}>
@@ -1661,11 +1711,26 @@ function Mascot({
         <meshStandardMaterial color="#FF6B6B" transparent opacity={0.6} depthTest={false} />
       </mesh>
 
-      <Html position={[0, 5, 0]} center>
-        <div className="bg-gradient-to-r from-yellow-400 to-orange-500 px-3 py-1 rounded-full text-white font-bold text-sm whitespace-nowrap shadow-lg">
-          🐥 버디 {isDragging && "✨"}
+      <Html position={[0, 5.5, 0]} center>
+        <div className="bg-gradient-to-r from-yellow-400 to-orange-500 px-4 py-2 rounded-full text-white font-bold text-base whitespace-nowrap shadow-lg">
+          {getMascotLabel(district.id)} {isDragging && "✨"}
         </div>
       </Html>
     </group>
   );
+}
+
+function getMascotLabel(districtId: string): string {
+  switch (districtId) {
+    case "gyeongbokgung":
+      return "🎎 한복 버디";
+    case "hongdae":
+      return "🎨 아티스트 버디";
+    case "itaewon":
+      return "🎧 DJ 버디";
+    case "gangnam":
+      return "💼 셀럽 버디";
+    default:
+      return "🐥 버디";
+  }
 }
