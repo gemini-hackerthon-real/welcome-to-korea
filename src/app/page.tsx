@@ -184,7 +184,7 @@ export default function Home() {
         <ScreenshotPanel
           isOpen={screenshotPanelOpen}
           onClose={() => setScreenshotPanelOpen(false)}
-          onJumpToView={handleJumpToMapLocation}
+          onJumpToView={handleJumpToView}
         />
 
         {/* Footer */}

@@ -31,6 +31,12 @@ export default function ScreenshotPanel({
 
       if (analysisResult.place_id === "unknown") {
         setError("인식할 수 없는 장소입니다. 서울 관광지 사진을 업로드해주세요.");
+      } else if (analysisResult.confidence >= 0.7 && analysisResult.camera_preset) {
+        // 높은 신뢰도로 인식되면 자동으로 이동
+        setTimeout(() => {
+          onJumpToView(analysisResult.camera_preset!, analysisResult.place_id);
+          onClose();
+        }, 1500); // 결과를 잠시 보여준 후 이동
       }
     } catch (err) {
       setError("이미지 분석 중 오류가 발생했습니다.");
