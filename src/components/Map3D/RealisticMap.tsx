@@ -48,36 +48,24 @@ const REAL_LOCATIONS: Record<string, Array<{
   depth?: number;
 }>> = {
   gyeongbokgung: [
-    // 주요 전각 (실제 조사한 치수 반영: 미터 단위)
-    // 근정전: 30m(W) x 21m(D) x 25m(H), 2단 월대 포함
-    { name: "근정전", lat: 37.5786, lng: 126.9770, type: "palace_double", height: 25, width: 30, depth: 21 },
-    // 광화문: 거대 석축 베이스 + 2층 누각
-    { name: "광화문", lat: 37.5759, lng: 126.9769, type: "gate_double", height: 18, width: 40, depth: 15 },
-    // 흥례문
+    // 주요 전각 (스케일 다운 및 단층화)
+    { name: "근정전", lat: 37.5786, lng: 126.9770, type: "palace", height: 18, width: 30, depth: 21 },
+    { name: "광화문", lat: 37.5759, lng: 126.9769, type: "gate", height: 14, width: 40, depth: 15 },
     { name: "흥례문", lat: 37.5770, lng: 126.9770, type: "gate", height: 12, width: 30, depth: 12 },
-    // 근정문
     { name: "근정문", lat: 37.5779, lng: 126.9770, type: "gate", height: 11, width: 25, depth: 10 },
-    // 경회루: 34m(W) x 28m(D) x 21m(H), 연못 위 돌기둥 구조
-    { name: "경회루", lat: 37.5798, lng: 126.9752, type: "pavilion_water", height: 21, width: 34, depth: 28 },
-    // 사정전 (왕의 집무실)
-    { name: "사정전", lat: 37.5796, lng: 126.9770, type: "palace", height: 13, width: 22, depth: 16 },
-    // 강녕전 (왕의 침전)
-    { name: "강녕전", lat: 37.5805, lng: 126.9770, type: "palace", height: 12, width: 24, depth: 18 },
-    // 교태전 (왕비의 침전)
-    { name: "교태전", lat: 37.5812, lng: 126.9770, type: "palace", height: 11, width: 22, depth: 16 },
-    // 수정전
-    { name: "수정전", lat: 37.5788, lng: 126.9755, type: "palace", height: 10, width: 25, depth: 15 },
-    // 자경전
-    { name: "자경전", lat: 37.5815, lng: 126.9785, type: "palace", height: 10, width: 20, depth: 15 },
-    // 향원정 (연못 위 육각형 정자)
-    { name: "향원정", lat: 37.5825, lng: 126.9773, type: "pavilion_hex", height: 9, width: 10, depth: 10 },
-    // 집옥재
-    { name: "집옥재", lat: 37.5835, lng: 126.9765, type: "pavilion", height: 10, width: 18, depth: 12 },
+    { name: "경회루", lat: 37.5798, lng: 126.9752, type: "pavilion_water", height: 18, width: 34, depth: 28 },
+    { name: "사정전", lat: 37.5796, lng: 126.9770, type: "palace", height: 12, width: 22, depth: 16 },
+    { name: "강녕전", lat: 37.5805, lng: 126.9770, type: "palace", height: 11, width: 24, depth: 18 },
+    { name: "교태전", lat: 37.5812, lng: 126.9770, type: "palace", height: 10, width: 22, depth: 16 },
+    { name: "수정전", lat: 37.5788, lng: 126.9755, type: "palace", height: 9, width: 25, depth: 15 },
+    { name: "자경전", lat: 37.5815, lng: 126.9785, type: "palace", height: 9, width: 20, depth: 15 },
+    { name: "향원정", lat: 37.5825, lng: 126.9773, type: "pavilion_hex", height: 8, width: 10, depth: 10 },
+    { name: "집옥재", lat: 37.5835, lng: 126.9765, type: "pavilion", height: 9, width: 18, depth: 12 },
     // 중심축 행각
-    { name: "서행각", lat: 37.5786, lng: 126.9760, type: "corridor", height: 6, width: 5, depth: 40 },
-    { name: "동행각", lat: 37.5786, lng: 126.9780, type: "corridor", height: 6, width: 5, depth: 40 },
+    { name: "서행각", lat: 37.5786, lng: 126.9760, type: "corridor", height: 5, width: 5, depth: 40 },
+    { name: "동행각", lat: 37.5786, lng: 126.9780, type: "corridor", height: 5, width: 5, depth: 40 },
     // 국립민속박물관
-    { name: "민속박물관", lat: 37.5815, lng: 126.9800, type: "building", height: 25, width: 30, depth: 30 },
+    { name: "민속박물관", lat: 37.5815, lng: 126.9800, type: "building", height: 20, width: 30, depth: 30 },
   ],
   itaewon: [
     // 주요 랜드마크
@@ -632,7 +620,7 @@ function RealBuildings({ district }: { district: District }) {
   // 지역별 스케일 조정 (좌표 대비 간격)
   const getScale = (districtId: string) => {
     switch (districtId) {
-      case "gyeongbokgung": return 0.45; // 건물들을 더 가깝게 배치
+      case "gyeongbokgung": return 0.35; // 더 좁은 범위에 모이게 함
       case "itaewon": return 0.25;
       case "hongdae": return 0.35; // 건물 크기가 커졌으므로 간격 스케일 조정
       case "gangnam": return 0.22;
@@ -649,8 +637,8 @@ function RealBuildings({ district }: { district: District }) {
         const x = pos.x * scale;
         const z = pos.z * scale;
 
-        // 지역별 크기 배율 (한눈에 들어오도록 조정)
-        const sizeMult = district.id === "gyeongbokgung" ? 0.7 : 1.5;
+        // 지역별 크기 배율 (한눈에 들어오도록 소형화)
+        const sizeMult = district.id === "gyeongbokgung" ? 0.5 : 1.5;
 
         return (
           <Building
@@ -1524,7 +1512,7 @@ function Mascot({
   const ref = useRef<THREE.Group>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [position, setPosition] = useState<[number, number, number]>(
-    district.id === "gyeongbokgung" ? [0, 2, 200] : [0, 2, 20]
+    district.id === "gyeongbokgung" ? [0, 2, 120] : [0, 2, 20]
   );
   const { camera, raycaster, pointer } = useThree();
 
@@ -1579,9 +1567,9 @@ function Mascot({
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerLeave={onPointerUp}
-      scale={1.5}
+      scale={0.4}
       renderOrder={999}
-    >
+      >
       <mesh visible={false}>
         <sphereGeometry args={[4]} />
       </mesh>
