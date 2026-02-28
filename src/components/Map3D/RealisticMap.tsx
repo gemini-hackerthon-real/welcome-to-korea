@@ -1239,6 +1239,7 @@ function HongdaeDecorations() {
 
       {/* 네온 사인 */}
       <group position={[0, 18, 0]}>
+        {/* @ts-ignore */}
         <Text fontSize={4} color="#FFE66D" anchorX="center" anchorY="middle" outlineWidth={0.15} outlineColor="#000">
           HONGDAE
           <meshStandardMaterial color="#FFE66D" emissive="#FFE66D" emissiveIntensity={2} />
