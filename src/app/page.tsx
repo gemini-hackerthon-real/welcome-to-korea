@@ -41,6 +41,14 @@ const DISTRICTS: Record<string, District> = {
   gangnam: { id: "gangnam", name: "강남", icon: "🏢", color: "#3B82F6" },
 };
 
+// 지역별 구글맵 좌표
+const DISTRICT_COORDS: Record<string, { lat: number; lng: number }> = {
+  gyeongbokgung: { lat: 37.5796, lng: 126.9770 },
+  hongdae: { lat: 37.5563, lng: 126.9234 },
+  itaewon: { lat: 37.5340, lng: 126.9946 },
+  gangnam: { lat: 37.4980, lng: 127.0276 },
+};
+
 export default function Home() {
   const [currentDistrict, setCurrentDistrict] = useState<District | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -50,6 +58,11 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [screenshotPanelOpen, setScreenshotPanelOpen] = useState(false);
   const [cameraPreset, setCameraPreset] = useState<CameraPreset | undefined>(undefined);
+  const [mapTargetLocation, setMapTargetLocation] = useState<{
+    placeId: string;
+    lat: number;
+    lng: number;
+  } | null>(null);
 
   const handleDistrictSelect = useCallback((district: District) => {
     setIsTransitioning(true);
@@ -72,7 +85,20 @@ export default function Home() {
     }, 300);
   }, []);
 
-  // 스크린샷 분석 후 3D 뷰로 점프
+  // 스크린샷 분석 후 구글맵에서 해당 위치로 이동
+  const handleJumpToMapLocation = useCallback((preset: CameraPreset, placeId: string) => {
+    const coords = DISTRICT_COORDS[placeId];
+    if (!coords) return;
+
+    setMapTargetLocation({
+      placeId,
+      lat: coords.lat,
+      lng: coords.lng,
+    });
+    setScreenshotPanelOpen(false);
+  }, []);
+
+  // 스크린샷 분석 후 3D 뷰로 점프 (3D 뷰에서 사용)
   const handleJumpToView = useCallback((preset: CameraPreset, placeId: string) => {
     const district = DISTRICTS[placeId];
     if (!district) return;
@@ -128,7 +154,7 @@ export default function Home() {
           }`}
         />
 
-        <SeoulMap onDistrictSelect={handleDistrictSelect} />
+        <SeoulMap onDistrictSelect={handleDistrictSelect} targetLocation={mapTargetLocation} />
 
         {/* Header */}
         <div className="absolute top-4 left-4 z-10">
@@ -138,8 +164,31 @@ export default function Home() {
           <p className="text-gray-400 text-sm">Seoul Bird&apos;s Eye</p>
         </div>
 
+        {/* Screenshot Button - 구글 스타일 */}
+        <div className="absolute bottom-8 left-4 z-10">
+          <button
+            onClick={() => setScreenshotPanelOpen(!screenshotPanelOpen)}
+            className="flex items-center gap-4 px-5 py-4 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow"
+          >
+            <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center">
+              <span className="text-2xl">{screenshotPanelOpen ? "✕" : "📷"}</span>
+            </div>
+            <div className="text-left">
+              <p className="text-gray-800 font-medium text-base">사진으로 장소 찾기</p>
+              <p className="text-gray-500 text-sm">AI가 위치를 인식합니다</p>
+            </div>
+          </button>
+        </div>
+
+        {/* Screenshot Panel */}
+        <ScreenshotPanel
+          isOpen={screenshotPanelOpen}
+          onClose={() => setScreenshotPanelOpen(false)}
+          onJumpToView={handleJumpToMapLocation}
+        />
+
         {/* Footer */}
-        <div className="absolute bottom-4 right-4 z-10">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10">
           <p className="text-gray-600 text-xs">Powered by Google Gemini</p>
         </div>
       </main>
@@ -203,21 +252,6 @@ export default function Home() {
         </div>
         <p className="text-gray-300 text-sm">{getMascotDescription(currentDistrict.id)}</p>
       </div>
-
-      {/* Screenshot Button */}
-      <button
-        onClick={() => setScreenshotPanelOpen(!screenshotPanelOpen)}
-        className="absolute bottom-4 left-4 z-10 w-14 h-14 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-2xl shadow-lg hover:scale-110 transition-transform"
-      >
-        {screenshotPanelOpen ? "✕" : "📷"}
-      </button>
-
-      {/* Screenshot Panel */}
-      <ScreenshotPanel
-        isOpen={screenshotPanelOpen}
-        onClose={() => setScreenshotPanelOpen(false)}
-        onJumpToView={handleJumpToView}
-      />
 
       {/* Chat Button */}
       <button

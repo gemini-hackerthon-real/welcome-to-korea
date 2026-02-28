@@ -159,9 +159,14 @@ interface SeoulMapProps {
     icon: string;
     color: string;
   }) => void;
+  targetLocation?: {
+    placeId: string;
+    lat: number;
+    lng: number;
+  } | null;
 }
 
-export default function SeoulMap({ onDistrictSelect }: SeoulMapProps) {
+export default function SeoulMap({ onDistrictSelect, targetLocation }: SeoulMapProps) {
   const [hoveredDistrict, setHoveredDistrict] = useState<string | null>(null);
   const [currentZoom, setCurrentZoom] = useState(12);
   const [nearestDistrict, setNearestDistrict] = useState<string | null>(null);
@@ -255,6 +260,23 @@ export default function SeoulMap({ onDistrictSelect }: SeoulMapProps) {
     };
   }, []);
 
+  // targetLocation이 변경되면 해당 위치로 이동
+  useEffect(() => {
+    if (targetLocation && mapRef.current) {
+      // 부드럽게 해당 위치로 이동
+      mapRef.current.panTo({ lat: targetLocation.lat, lng: targetLocation.lng });
+      mapRef.current.setZoom(16); // 상세 줌 레벨
+
+      // 해당 지역 하이라이트
+      setHoveredDistrict(targetLocation.placeId);
+
+      // 2초 후 하이라이트 제거
+      setTimeout(() => {
+        setHoveredDistrict(null);
+      }, 2000);
+    }
+  }, [targetLocation]);
+
   if (loadError) {
     return (
       <div className="w-full h-full bg-gray-900 flex items-center justify-center">
@@ -326,7 +348,7 @@ export default function SeoulMap({ onDistrictSelect }: SeoulMapProps) {
         </p>
       </div>
 
-      {/* 줌 레벨 표시 */}
+      {/* 줌 레벨 표시 + 지역 바로가기 */}
       <div className="absolute top-4 right-4 bg-black/70 backdrop-blur px-3 py-2 rounded-lg">
         <div className="text-white text-xs mb-1">줌 레벨</div>
         <div className="flex items-center gap-2">
@@ -343,39 +365,35 @@ export default function SeoulMap({ onDistrictSelect }: SeoulMapProps) {
         {currentZoom < ZOOM_THRESHOLD && (
           <p className="text-gray-500 text-xs mt-1">3D 전환: {ZOOM_THRESHOLD}+</p>
         )}
-      </div>
 
-      {/* 범례 */}
-      <div className="absolute bottom-8 left-4 bg-black/80 backdrop-blur rounded-xl p-4">
-        <p className="text-white font-bold mb-3 text-sm">지역 바로가기</p>
-        <div className="space-y-2">
-          {Object.values(DISTRICT_POLYGONS).map((district) => (
-            <button
-              key={district.id}
-              onClick={() =>
-                onDistrictSelect({
-                  id: district.id,
-                  name: district.name,
-                  icon: district.icon,
-                  color: district.color,
-                })
-              }
-              onMouseEnter={() => setHoveredDistrict(district.id)}
-              onMouseLeave={() => setHoveredDistrict(null)}
-              className={`flex items-center gap-2 w-full px-3 py-2 rounded-lg transition-all ${
-                hoveredDistrict === district.id || nearestDistrict === district.id
-                  ? "bg-white/20"
-                  : "hover:bg-white/10"
-              }`}
-            >
-              <div
-                className="w-4 h-4 rounded"
-                style={{ backgroundColor: district.color }}
-              />
-              <span className="text-lg">{district.icon}</span>
-              <span className="text-white text-sm">{district.name}</span>
-            </button>
-          ))}
+        {/* 지역 바로가기 */}
+        <div className="mt-3 pt-3 border-t border-white/20">
+          <p className="text-white/70 text-xs mb-2">지역 바로가기</p>
+          <div className="grid grid-cols-2 gap-1">
+            {Object.values(DISTRICT_POLYGONS).map((district) => (
+              <button
+                key={district.id}
+                onClick={() =>
+                  onDistrictSelect({
+                    id: district.id,
+                    name: district.name,
+                    icon: district.icon,
+                    color: district.color,
+                  })
+                }
+                onMouseEnter={() => setHoveredDistrict(district.id)}
+                onMouseLeave={() => setHoveredDistrict(null)}
+                className={`flex items-center gap-1 px-2 py-1.5 rounded-lg transition-all text-xs ${
+                  hoveredDistrict === district.id || nearestDistrict === district.id
+                    ? "bg-white/20"
+                    : "hover:bg-white/10"
+                }`}
+              >
+                <span>{district.icon}</span>
+                <span className="text-white">{district.name}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>
