@@ -381,7 +381,7 @@ function ZoomAwareControls({
 
 function getBackgroundColor(districtId: string): string {
   switch (districtId) {
-    case "gyeongbokgung": return "#87CEEB"; // 낮 하늘
+    case "gyeongbokgung": return "#0077be"; // 진하고 맑은 푸른 하늘색
     case "itaewon": return "#0a0612"; // 밤
     case "hongdae": return "#f0e6d3"; // 저녁노을
     case "gangnam": return "#d4e5f7"; // 맑은 낮
@@ -523,7 +523,7 @@ function Ground({ district }: { district: District }) {
 
 function getGroundColor(districtId: string): string {
   switch (districtId) {
-    case "gyeongbokgung": return "#c9b896"; // 황토색 박석
+    case "gyeongbokgung": return "#e2b37a"; // 밝은 모래/황토색 마당
     case "itaewon": return "#1a1a2e"; // 어두운 아스팔트
     case "hongdae": return "#a0968c"; // 따뜻한 콘크리트
     case "gangnam": return "#2a2a2a"; // 도시 아스팔트
@@ -722,13 +722,15 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
     const isHex = type === "pavilion_hex";
     const isCorridor = type === "corridor";
 
-    // 단청 및 전통 색상 강화
-    const dancheongGreen = "#1a6b4a";
-    const dancheongRed = "#b91c1c";
-    const dancheongBlue = "#1e40af";
-    const dancheongYellow = "#ca8a04";
-    const woodColor = "#5d2e1d"; // 더 어두운 나무 색상
-    const stoneColor = "#78716c"; // 기단 돌 색상
+    // 단청 및 전통 색상 강화 (이미지 기반 고발색 팔레트)
+    const dancheongGreen = "#00a86b"; // 선명한 에메랄드/비취색
+    const dancheongRed = "#ef4444"; 
+    const dancheongBlue = "#3b82f6";
+    const dancheongYellow = "#fbbf24";
+    const columnRed = "#b91c1c"; // 강렬한 붉은 기둥
+    const wallTerracotta = "#da725c"; // 따뜻한 주황빛 벽면
+    const stoneColor = "#a8a29e"; // 기단 석재
+    const giwaColor = "#262626"; // 짙은 기와
 
     return (
       <group position={position}>
@@ -763,26 +765,26 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
           </>
         )}
 
-        {/* 기둥들 (자연스러운 나무색) */}
+        {/* 기둥들 (이미지 기반 강렬한 레드) */}
         {!isCorridor && Array.from({ length: Math.ceil(width / 5) }).map((_, i) => (
           <group key={`col-${i}`}>
             {/* 전면 기둥 */}
-            <mesh position={[-width / 2 + 1 + i * 5, height / 2 + 1.2, depth / 2 - 1.2]} castShadow>
+            <mesh position={[-width / 2 + 1 + i * 5, height / 2 + (isWater ? 8 : 1.2), depth / 2 - 1.2]} castShadow>
               <cylinderGeometry args={[0.7, 0.7, height, 12]} />
-              <meshStandardMaterial color={woodColor} roughness={0.7} />
+              <meshStandardMaterial color={columnRed} roughness={0.4} />
             </mesh>
             {/* 후면 기둥 */}
-            <mesh position={[-width / 2 + 1 + i * 5, height / 2 + 1.2, -depth / 2 + 1.2]} castShadow>
+            <mesh position={[-width / 2 + 1 + i * 5, height / 2 + (isWater ? 8 : 1.2), -depth / 2 + 1.2]} castShadow>
               <cylinderGeometry args={[0.7, 0.7, height, 12]} />
-              <meshStandardMaterial color={woodColor} roughness={0.7} />
+              <meshStandardMaterial color={columnRed} roughness={0.4} />
             </mesh>
           </group>
         ))}
 
-        {/* 본체 벽면 */}
+        {/* 본체 벽면 (따뜻한 테라코타 색상) */}
         <mesh position={[0, height / 2 + (isWater ? 8 : 1.6), 0]} castShadow receiveShadow>
           <boxGeometry args={[isHex ? width * 0.8 : width - 0.4, height - 0.4, isHex ? depth * 0.8 : depth - 0.4]} />
-          <meshStandardMaterial color="#d6d3d1" roughness={0.9} />
+          <meshStandardMaterial color={wallTerracotta} roughness={0.8} />
         </mesh>
 
         {/* 2층 구조 (중층 건물) */}
@@ -803,14 +805,14 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
 
         {/* 문/창살 패턴 (어두운 나무) */}
         {!isCorridor && Array.from({ length: Math.floor(width / 4) }).map((_, i) => (
-          <mesh key={`door-${i}`} position={[-width / 2 + 2 + i * 4, height / 2 + 1, depth / 2 + 0.3]}>
+          <mesh key={`door-${i}`} position={[-width / 2 + 2 + i * 4, height / 2 + (isWater ? 8 : 1), depth / 2 + 0.31]}>
             <planeGeometry args={[2.5, height - 2]} />
-            <meshStandardMaterial color={woodColor} />
+            <meshStandardMaterial color="#3d1a11" />
           </mesh>
         ))}
 
         {/* 처마 (지붕 밑) */}
-        <mesh position={[0, height + 1.5, 0]}>
+        <mesh position={[0, height + (isWater ? 8 : 1.5), 0]}>
           <boxGeometry args={[width + 4, 0.6, depth + 3]} />
           <meshStandardMaterial color={dancheongGreen} />
         </mesh>
