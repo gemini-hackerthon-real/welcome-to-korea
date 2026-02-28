@@ -57,15 +57,7 @@ Each location features:
 
 - **Color-highlighted tourist zones** on the main Seoul map
 - **Click or zoom** to enter detailed 3D views
-- **Contextual information** about food, transportation, and local customs
-
-### 📱 What You'll Learn
-
-For each location, discover:
-- 🍜 What to eat
-- 🚇 How to get around
-- 🎭 Cultural experiences to try
-- 📸 Photo spots and tips
+- **Contextual information** about transportation, and local customs
 
 ## Tech Stack
 
