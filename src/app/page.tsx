@@ -163,7 +163,7 @@ export default function Home() {
 
       {/* Header */}
       <div className="absolute top-4 left-4 z-10">
-        <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">
+        <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-blue-500">
           Welcome to Korea
         </h1>
       </div>

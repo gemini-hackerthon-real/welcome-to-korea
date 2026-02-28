@@ -3,7 +3,7 @@
 import { useRef, useState, useMemo, useEffect } from "react";
 import type { CameraPreset } from "@/types/camera";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, useCursor, Sky, Stars, Text, Html } from "@react-three/drei";
+import { OrbitControls, Html, useCursor, Text, Sky, Stars } from "@react-three/drei";
 import * as THREE from "three";
 
 interface District {
@@ -19,7 +19,7 @@ interface RealisticMapProps {
 }
 
 // 줌 아웃 임계값 - 이 이상 줌 아웃하면 지도로 전환
-const ZOOM_OUT_THRESHOLD = 350;
+const ZOOM_OUT_THRESHOLD = 180;
 
 // 실제 좌표 (위도/경도) → 3D 좌표 변환
 // 중심점 기준으로 미터 단위로 변환
@@ -48,24 +48,36 @@ const REAL_LOCATIONS: Record<string, Array<{
   depth?: number;
 }>> = {
   gyeongbokgung: [
-    // 주요 전각 (스케일 다운 및 단층화)
-    { name: "근정전", lat: 37.5786, lng: 126.9770, type: "palace", height: 18, width: 30, depth: 21 },
-    { name: "광화문", lat: 37.5759, lng: 126.9769, type: "gate", height: 14, width: 40, depth: 15 },
+    // 주요 전각 (실제 조사한 치수 반영: 미터 단위)
+    // 근정전: 30m(W) x 21m(D) x 25m(H), 2단 월대 포함
+    { name: "근정전", lat: 37.5786, lng: 126.9770, type: "palace_double", height: 25, width: 30, depth: 21 },
+    // 광화문: 거대 석축 베이스 + 2층 누각
+    { name: "광화문", lat: 37.5759, lng: 126.9769, type: "gate_double", height: 18, width: 40, depth: 15 },
+    // 흥례문
     { name: "흥례문", lat: 37.5770, lng: 126.9770, type: "gate", height: 12, width: 30, depth: 12 },
+    // 근정문
     { name: "근정문", lat: 37.5779, lng: 126.9770, type: "gate", height: 11, width: 25, depth: 10 },
-    { name: "경회루", lat: 37.5798, lng: 126.9752, type: "pavilion_water", height: 18, width: 34, depth: 28 },
-    { name: "사정전", lat: 37.5796, lng: 126.9770, type: "palace", height: 12, width: 22, depth: 16 },
-    { name: "강녕전", lat: 37.5805, lng: 126.9770, type: "palace", height: 11, width: 24, depth: 18 },
-    { name: "교태전", lat: 37.5812, lng: 126.9770, type: "palace", height: 10, width: 22, depth: 16 },
-    { name: "수정전", lat: 37.5788, lng: 126.9755, type: "palace", height: 9, width: 25, depth: 15 },
-    { name: "자경전", lat: 37.5815, lng: 126.9785, type: "palace", height: 9, width: 20, depth: 15 },
-    { name: "향원정", lat: 37.5825, lng: 126.9773, type: "pavilion_hex", height: 8, width: 10, depth: 10 },
-    { name: "집옥재", lat: 37.5835, lng: 126.9765, type: "pavilion", height: 9, width: 18, depth: 12 },
+    // 경회루: 34m(W) x 28m(D) x 21m(H), 연못 위 돌기둥 구조
+    { name: "경회루", lat: 37.5798, lng: 126.9752, type: "pavilion_water", height: 21, width: 34, depth: 28 },
+    // 사정전 (왕의 집무실)
+    { name: "사정전", lat: 37.5796, lng: 126.9770, type: "palace", height: 13, width: 22, depth: 16 },
+    // 강녕전 (왕의 침전)
+    { name: "강녕전", lat: 37.5805, lng: 126.9770, type: "palace", height: 12, width: 24, depth: 18 },
+    // 교태전 (왕비의 침전)
+    { name: "교태전", lat: 37.5812, lng: 126.9770, type: "palace", height: 11, width: 22, depth: 16 },
+    // 수정전
+    { name: "수정전", lat: 37.5788, lng: 126.9755, type: "palace", height: 10, width: 25, depth: 15 },
+    // 자경전
+    { name: "자경전", lat: 37.5815, lng: 126.9785, type: "palace", height: 10, width: 20, depth: 15 },
+    // 향원정 (연못 위 육각형 정자)
+    { name: "향원정", lat: 37.5825, lng: 126.9773, type: "pavilion_hex", height: 9, width: 10, depth: 10 },
+    // 집옥재
+    { name: "집옥재", lat: 37.5835, lng: 126.9765, type: "pavilion", height: 10, width: 18, depth: 12 },
     // 중심축 행각
-    { name: "서행각", lat: 37.5786, lng: 126.9760, type: "corridor", height: 5, width: 5, depth: 40 },
-    { name: "동행각", lat: 37.5786, lng: 126.9780, type: "corridor", height: 5, width: 5, depth: 40 },
+    { name: "서행각", lat: 37.5786, lng: 126.9760, type: "corridor", height: 6, width: 5, depth: 40 },
+    { name: "동행각", lat: 37.5786, lng: 126.9780, type: "corridor", height: 6, width: 5, depth: 40 },
     // 국립민속박물관
-    { name: "민속박물관", lat: 37.5815, lng: 126.9800, type: "building", height: 20, width: 30, depth: 30 },
+    { name: "민속박물관", lat: 37.5815, lng: 126.9800, type: "building", height: 25, width: 30, depth: 30 },
   ],
   itaewon: [
     // 주요 랜드마크
@@ -98,27 +110,27 @@ const REAL_LOCATIONS: Record<string, Array<{
     { name: "홍대입구역 3번출구", lat: 37.5585, lng: 126.9245, type: "station", height: 5, width: 20, depth: 15 },
     { name: "상상마당", lat: 37.5509, lng: 126.9214, type: "building", height: 25, width: 22, depth: 18 },
     { name: "홍대놀이터", lat: 37.5526, lng: 126.9216, type: "plaza", height: 2, width: 30, depth: 30 },
-    
+
     // 주요 거리
     { name: "걷고싶은거리", lat: 37.5565, lng: 126.9238, type: "street", height: 12, width: 45, depth: 8 },
     { name: "경의선 숲길(연트럴)", lat: 37.5595, lng: 126.9255, type: "street", height: 8, width: 60, depth: 12 },
     { name: "버스킹 메인 스테이지", lat: 37.5560, lng: 126.9228, type: "stage", height: 3, width: 15, depth: 15 },
-    
+
     // 클럽 거리 (밀집 지역)
     { name: "클럽 NB2", lat: 37.5515, lng: 126.9225, type: "club", height: 18, width: 14, depth: 14 },
     { name: "클럽 아우라", lat: 37.5512, lng: 126.9220, type: "club", height: 20, width: 16, depth: 15 },
     { name: "클럽 FF", lat: 37.5505, lng: 126.9222, type: "club", height: 14, width: 10, depth: 10 },
-    
+
     // 연남동 & 카페 지역
     { name: "연남동 카페거리 1", lat: 37.5605, lng: 126.9260, type: "cafe", height: 12, width: 12, depth: 10 },
     { name: "연남동 카페거리 2", lat: 37.5610, lng: 126.9265, type: "cafe", height: 14, width: 10, depth: 12 },
     { name: "루프탑 카페", lat: 37.5572, lng: 126.9220, type: "cafe", height: 14, width: 10, depth: 10 },
-    
+
     // 아트 & 쇼핑
     { name: "오브젝트 성수/홍대", lat: 37.5558, lng: 126.9215, type: "art", height: 11, width: 15, depth: 12 },
     { name: "AK플라자 홍대", lat: 37.5570, lng: 126.9245, type: "shop", height: 35, width: 30, depth: 25 },
     { name: "스타일난다", lat: 37.5545, lng: 126.9225, type: "shop", height: 15, width: 18, depth: 15 },
-    
+
     // 먹자 골목
     { name: "홍대 맛집 거리 1", lat: 37.5548, lng: 126.9236, type: "restaurant", height: 10, width: 14, depth: 12 },
     { name: "홍대 맛집 거리 2", lat: 37.5562, lng: 126.9258, type: "restaurant", height: 12, width: 16, depth: 14 },
@@ -157,11 +169,11 @@ export default function RealisticMap({ district, onZoomOut, cameraPreset }: Real
   return (
     <div className="relative w-full h-full">
       <Canvas
-        camera={{ position: [100, 60, 250], fov: 45 }}
+        camera={{ position: [0, 80, 120], fov: 45 }}
         shadows
       >
         <color attach="background" args={[getBackgroundColor(district.id)]} />
-        <fog attach="fog" args={[getBackgroundColor(district.id), 250, 800]} />
+        <fog attach="fog" args={[getBackgroundColor(district.id), 300, 1000]} />
 
         {/* 하늘 배경 */}
         {district.id !== "itaewon" ? (
@@ -197,7 +209,6 @@ export default function RealisticMap({ district, onZoomOut, cameraPreset }: Real
           enabled={!isDraggingMascot}
           onZoomOut={onZoomOut}
           cameraPreset={cameraPreset}
-          districtId={district.id}
         />
 
         {/* 바닥 */}
@@ -222,7 +233,25 @@ export default function RealisticMap({ district, onZoomOut, cameraPreset }: Real
 
         {/* 마스코트 */}
         <Mascot district={district} onDragChange={setIsDraggingMascot} />
+
+        {/* 좌표 표시 */}
+        <CoordinateInfo district={district} />
       </Canvas>
+
+      {/* 정보 오버레이 */}
+      <div className="absolute top-20 left-4 bg-black/80 backdrop-blur p-4 rounded-xl text-white max-w-xs border border-white/10">
+        <p className="font-bold text-yellow-400 mb-2 flex items-center gap-2">
+          <span className="text-xl">🗺️</span>
+          실제 좌표 기반 3D
+        </p>
+        <p className="text-gray-300 text-xs leading-relaxed">
+          Google Maps 좌표를 기반으로 실제 위치에
+          <span className="text-yellow-400 font-bold"> 3D 건물</span>을 배치했습니다.
+        </p>
+        <div className="mt-2 pt-2 border-t border-white/10 text-xs text-gray-400">
+          📍 {district.name} ({CENTER_COORDS[district.id as keyof typeof CENTER_COORDS]?.lat.toFixed(4)}, {CENTER_COORDS[district.id as keyof typeof CENTER_COORDS]?.lng.toFixed(4)})
+        </div>
+      </div>
 
       {/* 줌 아웃 안내 */}
       {onZoomOut && (
@@ -238,13 +267,11 @@ export default function RealisticMap({ district, onZoomOut, cameraPreset }: Real
 function ZoomAwareControls({
   enabled,
   onZoomOut,
-  cameraPreset,
-  districtId
+  cameraPreset
 }: {
   enabled: boolean;
   onZoomOut?: () => void;
-  cameraPreset?: CameraPreset;
-  districtId: string;
+  cameraPreset?: import("@/types/camera").CameraPreset;
 }) {
   const controlsRef = useRef<any>(null);
   const { camera } = useThree();
@@ -345,9 +372,9 @@ function ZoomAwareControls({
       maxPolarAngle={Math.PI / 2.2}
       minPolarAngle={Math.PI / 8}
       minDistance={30}
-      maxDistance={ZOOM_OUT_THRESHOLD}
+      maxDistance={250}
       enabled={enabled && !animationRef.current?.isAnimating}
-      target={districtId === "gyeongbokgung" ? [0, 2, 200] : [0, 0, 0]}
+      target={[0, 0, 0]}
     />
   );
 }
@@ -374,26 +401,11 @@ function getSunPosition(districtId: string): [number, number, number] {
 function Ground({ district }: { district: District }) {
   return (
     <group>
-      {/* 메인 바닥 - 더 넓게 확장 */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} receiveShadow renderOrder={1}>
-        <planeGeometry args={[1000, 1000]} />
+      {/* 메인 바닥 */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
+        <planeGeometry args={[500, 500]} />
         <meshStandardMaterial color={getGroundColor(district.id)} />
       </mesh>
-
-      {/* 경복궁: 광화문 앞 해태상 및 디테일 */}
-      {district.id === "gyeongbokgung" && (
-        <group position={[0, 0, 180]} renderOrder={10}>
-          {/* 해태상 (광화문 양옆) */}
-          <mesh position={[-10, 1, 0]} castShadow>
-            <boxGeometry args={[2, 3, 2]} />
-            <meshStandardMaterial color="#a8a29e" />
-          </mesh>
-          <mesh position={[10, 1, 0]} castShadow>
-            <boxGeometry args={[2, 3, 2]} />
-            <meshStandardMaterial color="#a8a29e" />
-          </mesh>
-        </group>
-      )}
 
       {/* 경복궁: 자갈길과 잔디 영역 */}
       {district.id === "gyeongbokgung" && (
@@ -418,27 +430,6 @@ function Ground({ district }: { district: District }) {
             <meshStandardMaterial color="#4a90a4" transparent opacity={0.8} />
           </mesh>
         </>
-      )}
-
-      {/* 경복궁: 배경 산 (맨 뒤 배치) */}
-      {district.id === "gyeongbokgung" && (
-        <group position={[0, 0, -250]} renderOrder={0}>
-          {/* 북악산 (중앙, 멀리) */}
-          <mesh position={[0, 40, -50]}>
-            <coneGeometry args={[120, 80, 8]} />
-            <meshStandardMaterial color="#1a2e1a" />
-          </mesh>
-          {/* 인왕산 (왼쪽) */}
-          <mesh position={[-150, 25, -20]}>
-            <coneGeometry args={[100, 60, 8]} />
-            <meshStandardMaterial color="#2d3e2d" />
-          </mesh>
-          {/* 낙산 (오른쪽) */}
-          <mesh position={[150, 20, -30]}>
-            <coneGeometry args={[90, 50, 8]} />
-            <meshStandardMaterial color="#2d3e2d" />
-          </mesh>
-        </group>
       )}
 
       {/* 이태원: 네온 라인과 어두운 바닥 */}
@@ -490,10 +481,40 @@ function Ground({ district }: { district: District }) {
           {/* 횡단보도 */}
           {Array.from({ length: 5 }).map((_, i) => (
             <mesh key={`cross-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.35, -30 + i * 15]}>
-              <planeGeometry args={[8, 3]} />
+              <planeGeometry args={[12, 3]} />
               <meshStandardMaterial color="#ffffff" />
             </mesh>
           ))}
+        </>
+      )}
+
+      {/* 원경 산/언덕 (경복궁) - 북악산 배경 */}
+      {district.id === "gyeongbokgung" && (
+        <>
+          {/* 북악산 (중앙, 멀리) */}
+          <mesh position={[0, 15, -120]}>
+            <coneGeometry args={[60, 40, 8]} />
+            <meshStandardMaterial color="#2d4a2a" />
+          </mesh>
+          {/* 인왕산 (왼쪽) */}
+          <mesh position={[-80, 10, -110]}>
+            <coneGeometry args={[45, 30, 8]} />
+            <meshStandardMaterial color="#3d5c3a" />
+          </mesh>
+          {/* 낙산 (오른쪽) */}
+          <mesh position={[75, 8, -115]}>
+            <coneGeometry args={[40, 25, 8]} />
+            <meshStandardMaterial color="#4a6b47" />
+          </mesh>
+          {/* 추가 원경 산들 */}
+          <mesh position={[-40, 12, -130]}>
+            <coneGeometry args={[50, 35, 8]} />
+            <meshStandardMaterial color="#3a5437" />
+          </mesh>
+          <mesh position={[40, 10, -125]}>
+            <coneGeometry args={[45, 28, 8]} />
+            <meshStandardMaterial color="#2d4a2a" />
+          </mesh>
         </>
       )}
     </group>
@@ -602,7 +623,7 @@ function RealBuildings({ district }: { district: District }) {
   // 지역별 스케일 조정 (좌표 대비 간격)
   const getScale = (districtId: string) => {
     switch (districtId) {
-      case "gyeongbokgung": return 0.5; // 약간 더 넓게 배치
+      case "gyeongbokgung": return 0.8; // 궁궐의 실제 배치감을 위해 스케일 조정
       case "itaewon": return 0.25;
       case "hongdae": return 0.35; // 건물 크기가 커졌으므로 간격 스케일 조정
       case "gangnam": return 0.22;
@@ -613,14 +634,14 @@ function RealBuildings({ district }: { district: District }) {
   const scale = getScale(district.id);
 
   return (
-    <group renderOrder={100}>
+    <group>
       {locations.map((loc, i) => {
         const pos = latLngToMeters(loc.lat, loc.lng, center.lat, center.lng);
         const x = pos.x * scale;
         const z = pos.z * scale;
 
-        // 지역별 크기 배율 (적절한 중간 크기로 조정)
-        const sizeMult = district.id === "gyeongbokgung" ? 0.8 : 1.5;
+        // 지역별 크기 배율 (경복궁은 1.0으로 실제 비율 유지)
+        const sizeMult = district.id === "gyeongbokgung" ? 1.0 : 1.5;
 
         return (
           <Building
@@ -677,10 +698,10 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
       case "cafe":
       case "shop":
       case "restaurant":
-        const colorIdx = Math.abs(name.split('').reduce((a,b)=>a+b.charCodeAt(0), 0)) % (isHongdae ? hongdaeColors.length : 4);
-        return { 
-          color: isHongdae ? hongdaeColors[colorIdx] : ["#9370DB", "#FF6B6B", "#4ECDC4", "#FFE66D"][colorIdx], 
-          roof: "#333", 
+        const colorIdx = Math.abs(name.split('').reduce((a, b) => a + b.charCodeAt(0), 0)) % (isHongdae ? hongdaeColors.length : 4);
+        return {
+          color: isHongdae ? hongdaeColors[colorIdx] : ["#9370DB", "#FF6B6B", "#4ECDC4", "#FFE66D"][colorIdx],
+          roof: "#333",
           isTraditional: false,
           hasDetail: isHongdae
         };
@@ -703,7 +724,7 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
 
     // 단청 및 전통 색상 강화 (이미지 기반 고발색 팔레트)
     const dancheongGreen = "#00a86b"; // 선명한 에메랄드/비취색
-    const dancheongRed = "#ef4444"; 
+    const dancheongRed = "#ef4444";
     const dancheongBlue = "#3b82f6";
     const dancheongYellow = "#fbbf24";
     const columnRed = "#b91c1c"; // 강렬한 붉은 기둥
@@ -836,6 +857,33 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
           <boxGeometry args={[width + 5, 1.8, depth + 4]} />
           <meshStandardMaterial color="#262626" roughness={0.9} />
         </mesh>
+
+        {/* 용마루 (지붕 꼭대기) */}
+        {!isCorridor && (
+          <group position={[0, height + 4, 0]}>
+            {/* 팔작지붕 형태 */}
+            <mesh rotation={[0, 0, 0]} castShadow>
+              <boxGeometry args={[width + 3, 0.8, 2]} />
+              <meshStandardMaterial color="#1a1a1a" />
+            </mesh>
+            {/* 양 끝 치미/취두 장식 */}
+            <mesh position={[width / 2 + 1, 0.8, 0]}>
+              <coneGeometry args={[0.5, 1.5, 4]} />
+              <meshStandardMaterial color="#1a1a1a" />
+            </mesh>
+            <mesh position={[-width / 2 - 1, 0.8, 0]}>
+              <coneGeometry args={[0.5, 1.5, 4]} />
+              <meshStandardMaterial color="#1a1a1a" />
+            </mesh>
+            {/* 용마루 문양 */}
+            {(isPalace || isGate) && (
+              <mesh position={[0, 1, 0]}>
+                <sphereGeometry args={[0.6, 8, 8]} />
+                <meshStandardMaterial color={dancheongYellow} emissive={dancheongYellow} emissiveIntensity={0.5} />
+              </mesh>
+            )}
+          </group>
+        )}
 
         {/* 정자/누각 추가 장식 */}
         {isPavilion && (
@@ -985,6 +1033,16 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
           )}
         </group>
 
+        {/* 액센트 LED 라인 */}
+        <mesh position={[0, height + 2.5, depth / 2 + 0.2]}>
+          <boxGeometry args={[width + 0.5, 0.2, 0.1]} />
+          <meshStandardMaterial color={accentColor} emissive={accentColor} emissiveIntensity={1.5} />
+        </mesh>
+        <mesh position={[0, 3.2, depth / 2 + 1.15]}>
+          <boxGeometry args={[width + 2, 0.15, 0.1]} />
+          <meshStandardMaterial color={accentColor} emissive={accentColor} emissiveIntensity={1} />
+        </mesh>
+
         {/* 이름 라벨 */}
         <Html position={[0, height + 8, 0]} center>
           <div className="bg-gradient-to-r from-blue-900/90 to-slate-900/90 px-3 py-1.5 rounded-lg text-white text-xs whitespace-nowrap border border-blue-400/30 shadow-lg backdrop-blur">
@@ -1024,7 +1082,7 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
           distance={15}
         />
 
-        {/* 이름 라벨 */}
+        {/* 이름 라벨 - 항상 표시 */}
         <Html position={[0, height + 3, 0]} center>
           <div
             className="px-2 py-1 rounded text-white text-xs whitespace-nowrap font-bold"
@@ -1070,8 +1128,8 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
         onPointerOut={() => setHovered(false)}
       >
         <boxGeometry args={[width, height, depth]} />
-        <meshStandardMaterial 
-          color={hovered ? "#fff" : style.color} 
+        <meshStandardMaterial
+          color={hovered ? "#fff" : style.color}
           roughness={0.7}
           metalness={0.1}
         />
@@ -1262,7 +1320,7 @@ function HongdaeDecorations() {
           <cylinderGeometry args={[10, 10.5, 0.8, 32]} />
           <meshStandardMaterial color="#4a3728" roughness={0.9} />
         </mesh>
-        
+
         {/* 무대 네온 테두리 */}
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.85, 0]}>
           <torusGeometry args={[10, 0.1, 16, 64]} />
@@ -1305,7 +1363,6 @@ function HongdaeDecorations() {
             <cylinderGeometry args={[0.08, 0.08, 0.8, 8]} />
             <meshStandardMaterial color="#333" />
           </mesh>
-          {/* 마이크 헤드 */}
           <mesh position={[0, 4.3, 0.5]}>
             <sphereGeometry args={[0.15, 8, 8]} />
             <meshStandardMaterial color="#aaa" metalness={1} />
@@ -1356,7 +1413,6 @@ function HongdaeDecorations() {
 
       {/* 네온 사인 */}
       <group position={[0, 18, 0]}>
-        {/* @ts-ignore */}
         <Text fontSize={4} color="#FFE66D" anchorX="center" anchorY="middle" outlineWidth={0.15} outlineColor="#000">
           HONGDAE
           <meshStandardMaterial color="#FFE66D" emissive="#FFE66D" emissiveIntensity={2} />
@@ -1397,7 +1453,17 @@ function BalloonCluster({ position, colors }: { position: [number, number, numbe
   );
 }
 
-// CoordinateInfo 제거됨
+function CoordinateInfo({ district }: { district: District }) {
+  const center = CENTER_COORDS[district.id as keyof typeof CENTER_COORDS];
+
+  return (
+    <Html position={[0, 0.5, -80]} center>
+      <div className="bg-black/60 px-3 py-1 rounded text-white text-xs">
+        중심 좌표: {center?.lat.toFixed(6)}, {center?.lng.toFixed(6)}
+      </div>
+    </Html>
+  );
+}
 
 // 홍대 NPC들 배치
 function HongdaeNPCs() {
@@ -1437,7 +1503,7 @@ function HongdaeNPCs() {
 // 개별 NPC 컴포넌트
 function NPC({ position, color, offset, rotationY = 0 }: { position: [number, number, number]; color: string; offset: number; rotationY?: number }) {
   const ref = useRef<THREE.Group>(null);
-  
+
   useFrame((state) => {
     if (!ref.current) return;
     const t = state.clock.elapsedTime + offset;
@@ -1476,7 +1542,7 @@ function Mascot({
   const ref = useRef<THREE.Group>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [position, setPosition] = useState<[number, number, number]>(
-    district.id === "gyeongbokgung" ? [45, 2, 145] : [0, 2, 20]
+    district.id === "gyeongbokgung" ? [0, 2, 40] : [0, 2, 20]
   );
   const { camera, raycaster, pointer } = useThree();
 
@@ -1515,9 +1581,6 @@ function Mascot({
 
     if (district.id === "itaewon") {
       ref.current.rotation.y = Math.sin(t * 4) * 0.3;
-    } else if (district.id === "gyeongbokgung") {
-      // 카메라를 바라보도록 남쪽(Math.PI) 고정 + 약간의 흔들림
-      ref.current.rotation.y = Math.PI + Math.sin(t * 0.8) * 0.1;
     } else {
       ref.current.rotation.y = Math.sin(t * 0.8) * 0.15;
     }
@@ -1531,9 +1594,9 @@ function Mascot({
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerLeave={onPointerUp}
-      scale={0.6}
+      scale={1.5}
       renderOrder={999}
-      >
+    >
       <mesh visible={false}>
         <sphereGeometry args={[4]} />
       </mesh>
@@ -1547,10 +1610,10 @@ function Mascot({
       {/* 상의/재킷 레이어 */}
       <mesh position={[0, 0.5, 0]} castShadow>
         <cylinderGeometry args={[1.3, 1.3, 2.2, 24]} />
-        <meshStandardMaterial 
-          color={isDragging ? "#FFD700" : (district.id === "hongdae" ? "#AA96DA" : district.color)} 
-          depthTest={false} 
-          transparent 
+        <meshStandardMaterial
+          color={isDragging ? "#FFD700" : (district.id === "hongdae" ? "#AA96DA" : district.color)}
+          depthTest={false}
+          transparent
         />
       </mesh>
 
@@ -1647,8 +1710,27 @@ function Mascot({
         <sphereGeometry args={[0.25]} />
         <meshStandardMaterial color="#FF6B6B" transparent opacity={0.6} depthTest={false} />
       </mesh>
+
+      <Html position={[0, 5.5, 0]} center>
+        <div className="bg-gradient-to-r from-yellow-400 to-orange-500 px-4 py-2 rounded-full text-white font-bold text-base whitespace-nowrap shadow-lg">
+          {getMascotLabel(district.id)} {isDragging && "✨"}
+        </div>
+      </Html>
     </group>
   );
 }
 
-// getMascotLabel 함수 제거됨
+function getMascotLabel(districtId: string): string {
+  switch (districtId) {
+    case "gyeongbokgung":
+      return "🎎 한복 버디";
+    case "hongdae":
+      return "🎨 아티스트 버디";
+    case "itaewon":
+      return "🎧 DJ 버디";
+    case "gangnam":
+      return "💼 셀럽 버디";
+    default:
+      return "🐥 버디";
+  }
+}
