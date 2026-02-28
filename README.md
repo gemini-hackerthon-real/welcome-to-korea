@@ -8,7 +8,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-98.4%25-3178C6?logo=typescript)](https://www.typescriptlang.org/)
 
 <p align="center">
-  <img src="download.jpeg" alt="Welcome to Korea" width="600">
+  <img src="image_press.png" alt="Welcome to Korea" width="600">
 </p>
 
 ## The Problem
