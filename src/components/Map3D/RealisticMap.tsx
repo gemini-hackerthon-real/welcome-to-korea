@@ -19,7 +19,7 @@ interface RealisticMapProps {
 }
 
 // 줌 아웃 임계값 - 이 이상 줌 아웃하면 지도로 전환
-const ZOOM_OUT_THRESHOLD = 180;
+const ZOOM_OUT_THRESHOLD = 350;
 
 // 실제 좌표 (위도/경도) → 3D 좌표 변환
 // 중심점 기준으로 미터 단위로 변환
@@ -409,14 +409,14 @@ function Ground({ district }: { district: District }) {
 
       {/* 경복궁: 광화문 앞 해태상 및 디테일 */}
       {district.id === "gyeongbokgung" && (
-        <group position={[0, 0, 340]} renderOrder={10}>
+        <group position={[0, 0, 180]} renderOrder={10}>
           {/* 해태상 (광화문 양옆) */}
-          <mesh position={[-15, 1, 0]} castShadow>
-            <boxGeometry args={[3, 4, 3]} />
+          <mesh position={[-10, 1, 0]} castShadow>
+            <boxGeometry args={[2, 3, 2]} />
             <meshStandardMaterial color="#a8a29e" />
           </mesh>
-          <mesh position={[15, 1, 0]} castShadow>
-            <boxGeometry args={[3, 4, 3]} />
+          <mesh position={[10, 1, 0]} castShadow>
+            <boxGeometry args={[2, 3, 2]} />
             <meshStandardMaterial color="#a8a29e" />
           </mesh>
         </group>
@@ -629,7 +629,7 @@ function RealBuildings({ district }: { district: District }) {
   // 지역별 스케일 조정 (좌표 대비 간격)
   const getScale = (districtId: string) => {
     switch (districtId) {
-      case "gyeongbokgung": return 0.8; // 궁궐의 실제 배치감을 위해 스케일 조정
+      case "gyeongbokgung": return 0.45; // 건물들을 더 가깝게 배치
       case "itaewon": return 0.25;
       case "hongdae": return 0.35; // 건물 크기가 커졌으므로 간격 스케일 조정
       case "gangnam": return 0.22;
@@ -646,8 +646,8 @@ function RealBuildings({ district }: { district: District }) {
         const x = pos.x * scale;
         const z = pos.z * scale;
 
-        // 지역별 크기 배율 (경복궁은 1.0으로 실제 비율 유지)
-        const sizeMult = district.id === "gyeongbokgung" ? 1.0 : 1.5;
+        // 지역별 크기 배율 (한눈에 들어오도록 조정)
+        const sizeMult = district.id === "gyeongbokgung" ? 0.7 : 1.5;
 
         return (
           <Building
@@ -1548,7 +1548,7 @@ function Mascot({
   const ref = useRef<THREE.Group>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [position, setPosition] = useState<[number, number, number]>(
-    district.id === "gyeongbokgung" ? [0, 2, 380] : [0, 2, 20]
+    district.id === "gyeongbokgung" ? [0, 2, 200] : [0, 2, 20]
   );
   const { camera, raycaster, pointer } = useThree();
 
