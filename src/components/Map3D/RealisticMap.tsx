@@ -3,7 +3,7 @@
 import { useRef, useState, useMemo, useEffect } from "react";
 import type { CameraPreset } from "@/types/camera";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, useCursor, Sky, Stars, Text } from "@react-three/drei";
+import { OrbitControls, useCursor, Sky, Stars, Text, Html } from "@react-three/drei";
 import * as THREE from "three";
 
 interface District {
@@ -395,6 +395,31 @@ function Ground({ district }: { district: District }) {
         </group>
       )}
 
+      {/* 경복궁: 자갈길과 잔디 영역 */}
+      {district.id === "gyeongbokgung" && (
+        <>
+          {/* 중앙 어도 (왕의 길) */}
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.4, 0]}>
+            <planeGeometry args={[4, 80]} />
+            <meshStandardMaterial color="#8B7355" />
+          </mesh>
+          {/* 잔디 영역 */}
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-35, -0.45, 0]}>
+            <planeGeometry args={[30, 60]} />
+            <meshStandardMaterial color="#4a7c39" />
+          </mesh>
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[35, -0.45, 0]}>
+            <planeGeometry args={[30, 60]} />
+            <meshStandardMaterial color="#4a7c39" />
+          </mesh>
+          {/* 연못 (경회루 앞) */}
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-15, -0.3, -10]}>
+            <circleGeometry args={[12, 32]} />
+            <meshStandardMaterial color="#4a90a4" transparent opacity={0.8} />
+          </mesh>
+        </>
+      )}
+
       {/* 경복궁: 배경 산 (맨 뒤 배치) */}
       {district.id === "gyeongbokgung" && (
         <group position={[0, 0, -250]} renderOrder={0}>
@@ -414,6 +439,62 @@ function Ground({ district }: { district: District }) {
             <meshStandardMaterial color="#2d3e2d" />
           </mesh>
         </group>
+      )}
+
+      {/* 이태원: 네온 라인과 어두운 바닥 */}
+      {district.id === "itaewon" && (
+        <>
+          {/* 보도블록 패턴 */}
+          {Array.from({ length: 10 }).map((_, i) => (
+            <mesh key={`sidewalk-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[-50 + i * 12, -0.45, 0]}>
+              <planeGeometry args={[10, 80]} />
+              <meshStandardMaterial color={i % 2 === 0 ? "#252535" : "#1e1e2e"} />
+            </mesh>
+          ))}
+        </>
+      )}
+
+      {/* 홍대: 다채로운 바닥 패턴 */}
+      {district.id === "hongdae" && (
+        <>
+          {/* 걷고싶은거리 - 보도블록 패턴 */}
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.4, 0]}>
+            <planeGeometry args={[100, 40]} />
+            <meshStandardMaterial color="#d4a574" />
+          </mesh>
+          {/* 보도블록 그리드 라인 */}
+          {Array.from({ length: 10 }).map((_, i) => (
+            <mesh key={`grid-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.38, -20 + i * 4]}>
+              <planeGeometry args={[100, 0.1]} />
+              <meshStandardMaterial color="#b98a5a" />
+            </mesh>
+          ))}
+          {/* 버스킹존 원형 스테이지 */}
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-15, -0.35, -5]}>
+            <circleGeometry args={[10, 32]} />
+            <meshStandardMaterial color="#8b6914" />
+          </mesh>
+        </>
+      )}
+
+      {/* 강남: 격자형 도시 패턴 */}
+      {district.id === "gangnam" && (
+        <>
+          {/* 인도 */}
+          {Array.from({ length: 8 }).map((_, i) => (
+            <mesh key={`block-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[-42 + i * 12, -0.45, 0]}>
+              <planeGeometry args={[10, 80]} />
+              <meshStandardMaterial color={i % 2 === 0 ? "#3a3a3a" : "#2d2d2d"} />
+            </mesh>
+          ))}
+          {/* 횡단보도 */}
+          {Array.from({ length: 5 }).map((_, i) => (
+            <mesh key={`cross-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.35, -30 + i * 15]}>
+              <planeGeometry args={[8, 3]} />
+              <meshStandardMaterial color="#ffffff" />
+            </mesh>
+          ))}
+        </>
       )}
     </group>
   );
@@ -773,7 +854,12 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
           </>
         )}
 
-        {/* 이름 라벨 제거됨 */}
+        {/* 이름 라벨 */}
+        <Html position={[0, (isDouble ? height * 1.8 : height) + (isWater ? 12 : 10), 0]} center>
+          <div className="bg-gradient-to-b from-amber-900/90 to-stone-900/90 px-3 py-1.5 rounded text-white text-xs whitespace-nowrap border border-yellow-600/50 shadow-lg">
+            <span className="text-yellow-500">{isWater ? "🌊" : "🏯"}</span> {name}
+          </div>
+        </Html>
       </group>
     );
   }
@@ -899,7 +985,12 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
           )}
         </group>
 
-        {/* 이름 라벨 제거됨 */}
+        {/* 이름 라벨 */}
+        <Html position={[0, height + 8, 0]} center>
+          <div className="bg-gradient-to-r from-blue-900/90 to-slate-900/90 px-3 py-1.5 rounded-lg text-white text-xs whitespace-nowrap border border-blue-400/30 shadow-lg backdrop-blur">
+            <span className="text-blue-400">🏢</span> {name}
+          </div>
+        </Html>
       </group>
     );
   }
@@ -933,7 +1024,21 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
           distance={15}
         />
 
-        {/* 이름 라벨 제거됨 */}
+        {/* 이름 라벨 */}
+        <Html position={[0, height + 3, 0]} center>
+          <div
+            className="px-2 py-1 rounded text-white text-xs whitespace-nowrap font-bold"
+            style={{
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              borderColor: neonColor,
+              borderWidth: '1px',
+              borderStyle: 'solid',
+              textShadow: `0 0 10px ${neonColor}`
+            }}
+          >
+            🎵 {name}
+          </div>
+        </Html>
       </group>
     );
   }
@@ -1012,7 +1117,19 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
         </mesh>
       </group>
 
-      {/* 이름 라벨 제거됨 */}
+      {/* 이름 라벨 */}
+      <Html position={[0, height + 3, 0]} center>
+        <div
+          className="px-2 py-1 rounded text-white text-xs whitespace-nowrap font-bold shadow-xl backdrop-blur-sm"
+          style={{
+            backgroundColor: style.isNeon ? 'rgba(255, 20, 147, 0.8)' : 'rgba(0,0,0,0.7)',
+            border: `1px solid ${style.color}`,
+            textShadow: style.isNeon ? '0 0 8px #FF1493' : 'none'
+          }}
+        >
+          {getEmojiForType(type)} {name}
+        </div>
+      </Html>
     </group>
   );
 }
