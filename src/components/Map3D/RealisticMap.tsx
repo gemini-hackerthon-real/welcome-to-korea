@@ -763,18 +763,18 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
           </>
         )}
 
-        {/* 기둥들 (더 굵고 위엄 있게) */}
+        {/* 기둥들 (자연스러운 나무색) */}
         {!isCorridor && Array.from({ length: Math.ceil(width / 5) }).map((_, i) => (
           <group key={`col-${i}`}>
             {/* 전면 기둥 */}
             <mesh position={[-width / 2 + 1 + i * 5, height / 2 + 1.2, depth / 2 - 1.2]} castShadow>
               <cylinderGeometry args={[0.7, 0.7, height, 12]} />
-              <meshStandardMaterial color="#7f1d1d" roughness={0.5} />
+              <meshStandardMaterial color={woodColor} roughness={0.7} />
             </mesh>
             {/* 후면 기둥 */}
             <mesh position={[-width / 2 + 1 + i * 5, height / 2 + 1.2, -depth / 2 + 1.2]} castShadow>
               <cylinderGeometry args={[0.7, 0.7, height, 12]} />
-              <meshStandardMaterial color="#7f1d1d" roughness={0.5} />
+              <meshStandardMaterial color={woodColor} roughness={0.7} />
             </mesh>
           </group>
         ))}
@@ -853,7 +853,7 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
         {/* 지붕 */}
         <mesh position={[0, (isDouble ? height * 1.5 : height) + (isWater ? 8 : 2.8), 0]} castShadow>
           <boxGeometry args={[width + 5, 1.8, depth + 4]} />
-          <meshStandardMaterial color="#1c1917" roughness={0.8} />
+          <meshStandardMaterial color="#262626" roughness={0.9} />
         </mesh>
 
         {/* 용마루 (지붕 꼭대기) */}
@@ -1593,6 +1593,7 @@ function Mascot({
       onPointerUp={onPointerUp}
       onPointerLeave={onPointerUp}
       scale={0.8}
+      renderOrder={999}
     >
       <mesh visible={false}>
         <sphereGeometry args={[4]} />
@@ -1601,19 +1602,23 @@ function Mascot({
       {/* 바지 레이어 */}
       <mesh castShadow>
         <capsuleGeometry args={[1.2, 1.2, 12, 24]} />
-        <meshStandardMaterial color="#2d3436" />
+        <meshStandardMaterial color="#2d3436" depthTest={false} transparent />
       </mesh>
 
       {/* 상의/재킷 레이어 */}
       <mesh position={[0, 0.5, 0]} castShadow>
         <cylinderGeometry args={[1.3, 1.3, 2.2, 24]} />
-        <meshStandardMaterial color={isDragging ? "#FFD700" : (district.id === "hongdae" ? "#AA96DA" : district.color)} />
+        <meshStandardMaterial 
+          color={isDragging ? "#FFD700" : (district.id === "hongdae" ? "#AA96DA" : district.color)} 
+          depthTest={false} 
+          transparent 
+        />
       </mesh>
 
       {/* 머리 */}
       <mesh position={[0, 2.8, 0]} castShadow>
         <sphereGeometry args={[1.5, 24, 24]} />
-        <meshStandardMaterial color="#FFE4B5" />
+        <meshStandardMaterial color="#FFE4B5" depthTest={false} transparent />
       </mesh>
 
       {/* 홍대 스타일: 헤드폰 추가 */}
@@ -1637,21 +1642,21 @@ function Mascot({
       {/* 눈 */}
       <mesh position={[-0.5, 2.7, 1.2]}>
         <sphereGeometry args={[0.2]} />
-        <meshStandardMaterial color="#000" />
+        <meshStandardMaterial color="#000" depthTest={false} transparent />
       </mesh>
       <mesh position={[0.5, 2.7, 1.2]}>
         <sphereGeometry args={[0.2]} />
-        <meshStandardMaterial color="#000" />
+        <meshStandardMaterial color="#000" depthTest={false} transparent />
       </mesh>
 
       {/* 볼터치 */}
       <mesh position={[-1, 2.3, 1]}>
         <sphereGeometry args={[0.25]} />
-        <meshStandardMaterial color="#FF6B6B" transparent opacity={0.6} />
+        <meshStandardMaterial color="#FF6B6B" transparent opacity={0.6} depthTest={false} />
       </mesh>
       <mesh position={[1, 2.3, 1]}>
         <sphereGeometry args={[0.25]} />
-        <meshStandardMaterial color="#FF6B6B" transparent opacity={0.6} />
+        <meshStandardMaterial color="#FF6B6B" transparent opacity={0.6} depthTest={false} />
       </mesh>
 
       <Html position={[0, 5, 0]} center>
