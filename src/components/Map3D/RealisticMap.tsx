@@ -169,7 +169,7 @@ export default function RealisticMap({ district, onZoomOut, cameraPreset }: Real
   return (
     <div className="relative w-full h-full">
       <Canvas
-        camera={{ position: [0, 120, 250], fov: 45 }}
+        camera={{ position: [0, 30, 280], fov: 45 }}
         shadows
       >
         <color attach="background" args={[getBackgroundColor(district.id)]} />
@@ -209,6 +209,7 @@ export default function RealisticMap({ district, onZoomOut, cameraPreset }: Real
           enabled={!isDraggingMascot}
           onZoomOut={onZoomOut}
           cameraPreset={cameraPreset}
+          districtId={district.id}
         />
 
         {/* 바닥 */}
@@ -267,11 +268,13 @@ export default function RealisticMap({ district, onZoomOut, cameraPreset }: Real
 function ZoomAwareControls({
   enabled,
   onZoomOut,
-  cameraPreset
+  cameraPreset,
+  districtId
 }: {
   enabled: boolean;
   onZoomOut?: () => void;
-  cameraPreset?: import("@/types/camera").CameraPreset;
+  cameraPreset?: CameraPreset;
+  districtId: string;
 }) {
   const controlsRef = useRef<any>(null);
   const { camera } = useThree();
@@ -372,9 +375,9 @@ function ZoomAwareControls({
       maxPolarAngle={Math.PI / 2.2}
       minPolarAngle={Math.PI / 8}
       minDistance={30}
-      maxDistance={250}
+      maxDistance={ZOOM_OUT_THRESHOLD}
       enabled={enabled && !animationRef.current?.isAnimating}
-      target={[0, 0, 0]}
+      target={districtId === "gyeongbokgung" ? [0, 2, 200] : [0, 0, 0]}
     />
   );
 }
@@ -863,33 +866,6 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
           <boxGeometry args={[width + 5, 1.8, depth + 4]} />
           <meshStandardMaterial color="#262626" roughness={0.9} />
         </mesh>
-
-        {/* 용마루 (지붕 꼭대기) */}
-        {!isCorridor && (
-          <group position={[0, height + 4, 0]}>
-            {/* 팔작지붕 형태 */}
-            <mesh rotation={[0, 0, 0]} castShadow>
-              <boxGeometry args={[width + 3, 0.8, 2]} />
-              <meshStandardMaterial color="#1a1a1a" />
-            </mesh>
-            {/* 양 끝 치미/취두 장식 */}
-            <mesh position={[width / 2 + 1, 0.8, 0]}>
-              <coneGeometry args={[0.5, 1.5, 4]} />
-              <meshStandardMaterial color="#1a1a1a" />
-            </mesh>
-            <mesh position={[-width / 2 - 1, 0.8, 0]}>
-              <coneGeometry args={[0.5, 1.5, 4]} />
-              <meshStandardMaterial color="#1a1a1a" />
-            </mesh>
-            {/* 용마루 문양 */}
-            {(isPalace || isGate) && (
-              <mesh position={[0, 1, 0]}>
-                <sphereGeometry args={[0.6, 8, 8]} />
-                <meshStandardMaterial color={dancheongYellow} emissive={dancheongYellow} emissiveIntensity={0.5} />
-              </mesh>
-            )}
-          </group>
-        )}
 
         {/* 정자/누각 추가 장식 */}
         {isPavilion && (
@@ -1587,6 +1563,9 @@ function Mascot({
 
     if (district.id === "itaewon") {
       ref.current.rotation.y = Math.sin(t * 4) * 0.3;
+    } else if (district.id === "gyeongbokgung") {
+      // 카메라를 바라보도록 남쪽(Math.PI) 고정 + 약간의 흔들림
+      ref.current.rotation.y = Math.PI + Math.sin(t * 0.8) * 0.1;
     } else {
       ref.current.rotation.y = Math.sin(t * 0.8) * 0.15;
     }
