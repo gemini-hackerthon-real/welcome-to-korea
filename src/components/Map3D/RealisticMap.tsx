@@ -169,7 +169,7 @@ export default function RealisticMap({ district, onZoomOut, cameraPreset }: Real
   return (
     <div className="relative w-full h-full">
       <Canvas
-        camera={{ position: [0, 80, 120], fov: 45 }}
+        camera={{ position: [0, 120, 250], fov: 45 }}
         shadows
       >
         <color attach="background" args={[getBackgroundColor(district.id)]} />
@@ -401,13 +401,28 @@ function getSunPosition(districtId: string): [number, number, number] {
 function Ground({ district }: { district: District }) {
   return (
     <group>
-      {/* 메인 바닥 */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
-        <planeGeometry args={[500, 500]} />
+      {/* 메인 바닥 - 더 넓게 확장 */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} receiveShadow renderOrder={1}>
+        <planeGeometry args={[1000, 1000]} />
         <meshStandardMaterial color={getGroundColor(district.id)} />
       </mesh>
 
-      {/* 경복궁: 자갈길과 잔디 영역 */}
+      {/* 경복궁: 광화문 앞 해태상 및 디테일 */}
+      {district.id === "gyeongbokgung" && (
+        <group position={[0, 0, 340]} renderOrder={10}>
+          {/* 해태상 (광화문 양옆) */}
+          <mesh position={[-15, 1, 0]} castShadow>
+            <boxGeometry args={[3, 4, 3]} />
+            <meshStandardMaterial color="#a8a29e" />
+          </mesh>
+          <mesh position={[15, 1, 0]} castShadow>
+            <boxGeometry args={[3, 4, 3]} />
+            <meshStandardMaterial color="#a8a29e" />
+          </mesh>
+        </group>
+      )}
+
+      {/* 경복궁: 배경 산 (맨 뒤 배치) */}
       {district.id === "gyeongbokgung" && (
         <>
           {/* 중앙 어도 (왕의 길) */}
@@ -1533,7 +1548,7 @@ function Mascot({
   const ref = useRef<THREE.Group>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [position, setPosition] = useState<[number, number, number]>(
-    district.id === "gyeongbokgung" ? [0, 2, 40] : [0, 2, 20]
+    district.id === "gyeongbokgung" ? [0, 2, 380] : [0, 2, 20]
   );
   const { camera, raycaster, pointer } = useThree();
 
