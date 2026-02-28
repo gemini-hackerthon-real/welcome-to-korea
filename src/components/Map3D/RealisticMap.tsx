@@ -157,7 +157,7 @@ export default function RealisticMap({ district, onZoomOut, cameraPreset }: Real
   return (
     <div className="relative w-full h-full">
       <Canvas
-        camera={{ position: [0, 30, 280], fov: 45 }}
+        camera={{ position: [0, 50, 320], fov: 45 }}
         shadows
       >
         <color attach="background" args={[getBackgroundColor(district.id)]} />
@@ -620,7 +620,7 @@ function RealBuildings({ district }: { district: District }) {
   // 지역별 스케일 조정 (좌표 대비 간격)
   const getScale = (districtId: string) => {
     switch (districtId) {
-      case "gyeongbokgung": return 0.35; // 더 좁은 범위에 모이게 함
+      case "gyeongbokgung": return 0.5; // 약간 더 넓게 배치
       case "itaewon": return 0.25;
       case "hongdae": return 0.35; // 건물 크기가 커졌으므로 간격 스케일 조정
       case "gangnam": return 0.22;
@@ -637,8 +637,8 @@ function RealBuildings({ district }: { district: District }) {
         const x = pos.x * scale;
         const z = pos.z * scale;
 
-        // 지역별 크기 배율 (한눈에 들어오도록 소형화)
-        const sizeMult = district.id === "gyeongbokgung" ? 0.5 : 1.5;
+        // 지역별 크기 배율 (적절한 중간 크기로 조정)
+        const sizeMult = district.id === "gyeongbokgung" ? 0.8 : 1.5;
 
         return (
           <Building
@@ -1512,7 +1512,7 @@ function Mascot({
   const ref = useRef<THREE.Group>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [position, setPosition] = useState<[number, number, number]>(
-    district.id === "gyeongbokgung" ? [0, 2, 120] : [0, 2, 20]
+    district.id === "gyeongbokgung" ? [0, 2, 180] : [0, 2, 20]
   );
   const { camera, raycaster, pointer } = useThree();
 
@@ -1567,7 +1567,7 @@ function Mascot({
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerLeave={onPointerUp}
-      scale={0.4}
+      scale={0.6}
       renderOrder={999}
       >
       <mesh visible={false}>
