@@ -1,6 +1,6 @@
 # Welcome to Korea 🇰🇷
 
-> **Experience Korea before you arrive** — An immersive 3D map service that brings Korean culture to life
+> **한국 오기 전부터 미리 즐겨보세요** — 한국 문화를 3D로 생생하게 보여주는 지도 서비스
 
 [![Built with Google Maps](https://img.shields.io/badge/Google%20Maps-API-4285F4?logo=googlemaps)](https://developers.google.com/maps)
 [![Powered by Gemini](https://img.shields.io/badge/Gemini-AI-8E75B2?logo=google)](https://ai.google.dev/)
@@ -11,57 +11,61 @@
   <img src="image_press.png" alt="Welcome to Korea" width="600">
 </p>
 
-## The Problem
+## 문제
 
-Have you ever relied on Google Maps while traveling abroad? The **Bird's Eye View** feature helps you understand unfamiliar spaces at a glance, providing crucial spatial context.
+해외여행 중 Google Maps 사용 빈번  
+Bird's Eye View(위에서 내려다보는 화면)로 낯선 동네 구조 빠른 파악, 길 찾기 도움
 
-But here's what most people don't know: **Google Maps in Korea is fundamentally different from the rest of the world.**
+한국 Google Maps는 다른 나라와 차이  
+보안 규정 영향으로 고정밀 항공/위성 이미지 활용 제한  
+그 결과 기능 제한
 
-Due to national security regulations, aerial precision imagery collection is restricted in South Korea. This means:
-- ❌ No Bird's Eye View
-- ❌ Limited 3D building data
-- ❌ Reduced spatial context for navigation
+- ❌ Bird's Eye View 미지원
+- ❌ 3D 건물 데이터 제한
+- ❌ 이동 동선 파악용 공간 정보 부족
 
-**Foreign visitors to Korea can't enjoy the same rich map experience they're used to back home.**
+외국인 방문자 기준, 익숙한 지도 경험 부재
 
-## Our Solution
+## 해결 방법
 
-**Welcome to Korea** reconstructs 3D spatial experiences **without** restricted aerial imagery.
+제한된 항공 이미지 없이 3D 공간 경험 재구성
 
-We leverage publicly available data:
-- 📍 **Street View images** — Already permitted and widely available
-- 🗺️ **Coordinate & location data** — Public geographic information
-- 🤖 **Google Gemini AI** — Contextual understanding and generation
+활용 데이터
 
-These elements are combined to create an immersive 3D representation that goes beyond simple navigation.
+- 📍 Street View 이미지
+- 🗺️ 좌표/위치 정보
+- 🤖 Google Gemini AI(장소 맥락 이해·생성)
 
-## Key Features
+단순 길 안내 넘어, 장소 분위기까지 전달하는 3D 지도 경험
 
-### 🏛️ Cultural Context, Not Just Maps
+## 주요 기능
 
-We don't just show you *where* — we show you *what it feels like*.
+### 🏛️ 위치 + 분위기
 
-| Gyeongbokgung Palace | Hongdae |
+위치만 표시가 아닌, “어떤 느낌의 장소” 전달
+
+| 경복궁 | 홍대 |
 |:---:|:---:|
-| Avatars in traditional Hanbok | Street artists with berets |
-| Serene, historical atmosphere | Vibrant, youthful energy |
-| Royal Korean heritage | Modern indie culture |
+| 한복 아바타 | 거리 예술가 아바타 |
+| 차분한 전통 분위기 | 활기찬 젊은 분위기 |
+| 역사/궁궐 감성 | 현대/인디 문화 감성 |
 
-Each location features:
-- **Custom avatars** dressed appropriately for the area
-- **Culturally-relevant animations** (traditional walks, street dancing)
-- **Location-specific building textures**
-- **Real-world scale** based on actual measurements
+장소별 요소
 
-### 🎯 Interactive Discovery
+- 분위기 맞춤 아바타 의상
+- 장소 맞춤 애니메이션(전통 걸음, 거리 댄스)
+- 장소별 건물 텍스처
+- 실측 기반 현실 비율 스케일
 
-- **Color-highlighted tourist zones** on the main Seoul map
-- **Click or zoom** to enter detailed 3D views
-- **Contextual information** about transportation, and local customs
+### 🎯 직접 탐험
 
-## Tech Stack
+- 서울 지도 관광 구역 색상 강조
+- 클릭/줌으로 상세 3D 뷰 진입
+- 교통, 이동 팁, 기본 매너 정보 제공
 
-| Category | Technology |
+## 기술 스택
+
+| 분류 | 기술 |
 |----------|------------|
 | **Frontend** | Next.js, TypeScript, Tailwind CSS |
 | **Maps** | Google Maps Platform API |
@@ -69,65 +73,27 @@ Each location features:
 | **3D Rendering** | Three.js / WebGL |
 | **Deployment** | Vercel, Docker |
 
-## Getting Started
+## 시작하기
 
-### Prerequisites
+### 준비물
 
 - Node.js 18+
 - Google Maps API Key
 - Google Gemini API Key
 
-### Installation
+### 설치
 
 ```bash
-# Clone the repository
+# 저장소 클론
 git clone https://github.com/gemini-hackerthon-real/welcome-to-korea.git
 cd welcome-to-korea
 
-# Install dependencies
+# 의존성 설치
 npm install
 
-# Set up environment variables
+# 환경 변수 설정
 cp .env.example .env.local
-# Edit .env.local with your API keys
+# .env.local에 API 키 입력
 
-# Run development server
+# 개발 서버 실행
 npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) to explore.
-
-## Project Structure
-
-```
-welcome-to-korea/
-├── src/                    # Source code
-├── DEPLOYMENT.md           # Deployment guide
-├── IMPLEMENTATION.md       # Implementation details
-├── PROJECT_PLAN.md         # Project planning docs
-└── ...
-```
-
-## Our Vision
-
-> **Protect Korea's security. Share Korea's charm.**
-
-Welcome to Korea creatively overcomes regulatory constraints to help foreign visitors experience Korean spaces more deeply, richly, and joyfully.
-
-We believe a map app should do more than give directions — it should **spark the excitement of travel itself**.
-
----
-
-## Team
-
-Built with ❤️ for the **Google Gemini Hackathon**
-
-## License
-
-This project is licensed under the MIT License.
-
----
-
-<p align="center">
-  <b>Welcome to Korea</b> — Where every map tells a story
-</p>
