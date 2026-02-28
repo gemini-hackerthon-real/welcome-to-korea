@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useMemo, useEffect } from "react";
+import type { CameraPreset } from "@/types/camera";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Html, useCursor, Text, Sky, Stars } from "@react-three/drei";
 import * as THREE from "three";
@@ -14,6 +15,7 @@ interface District {
 interface RealisticMapProps {
   district: District;
   onZoomOut?: () => void;
+  cameraPreset?: import("@/types/camera").CameraPreset;
 }
 
 // 줌 아웃 임계값 - 이 이상 줌 아웃하면 지도로 전환
@@ -156,7 +158,7 @@ const REAL_LOCATIONS: Record<string, Array<{
   ],
 };
 
-export default function RealisticMap({ district, onZoomOut }: RealisticMapProps) {
+export default function RealisticMap({ district, onZoomOut, cameraPreset }: RealisticMapProps) {
   const [isDraggingMascot, setIsDraggingMascot] = useState(false);
 
   return (
@@ -201,6 +203,7 @@ export default function RealisticMap({ district, onZoomOut }: RealisticMapProps)
         <ZoomAwareControls
           enabled={!isDraggingMascot}
           onZoomOut={onZoomOut}
+          cameraPreset={cameraPreset}
         />
 
         {/* 바닥 */}
@@ -255,14 +258,94 @@ export default function RealisticMap({ district, onZoomOut }: RealisticMapProps)
   );
 }
 
-// 줌 감지 OrbitControls
-function ZoomAwareControls({ enabled, onZoomOut }: { enabled: boolean; onZoomOut?: () => void }) {
+// 줌 감지 OrbitControls + 카메라 애니메이션
+function ZoomAwareControls({
+  enabled,
+  onZoomOut,
+  cameraPreset
+}: {
+  enabled: boolean;
+  onZoomOut?: () => void;
+  cameraPreset?: import("@/types/camera").CameraPreset;
+}) {
   const controlsRef = useRef<any>(null);
   const { camera } = useThree();
   const lastDistanceRef = useRef(0);
   const transitionTriggeredRef = useRef(false);
 
+  // 카메라 애니메이션 상태
+  const animationRef = useRef<{
+    isAnimating: boolean;
+    startTime: number;
+    duration: number;
+    startPosition: THREE.Vector3;
+    endPosition: THREE.Vector3;
+    startTarget: THREE.Vector3;
+    endTarget: THREE.Vector3;
+  } | null>(null);
+  const lastPresetIdRef = useRef<string | null>(null);
+
+  // Cubic ease-in-out
+  const easeInOutCubic = (t: number): number => {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  };
+
+  // 프리셋이 변경되면 애니메이션 시작
+  useEffect(() => {
+    if (cameraPreset && cameraPreset.id !== lastPresetIdRef.current && controlsRef.current) {
+      lastPresetIdRef.current = cameraPreset.id;
+
+      const duration = cameraPreset.transitionDuration || 2000;
+      const startPosition = camera.position.clone();
+      const endPosition = new THREE.Vector3(
+        cameraPreset.position.x,
+        cameraPreset.position.y,
+        cameraPreset.position.z
+      );
+      const startTarget = controlsRef.current.target.clone();
+      const endTarget = new THREE.Vector3(
+        cameraPreset.target.x,
+        cameraPreset.target.y,
+        cameraPreset.target.z
+      );
+
+      animationRef.current = {
+        isAnimating: true,
+        startTime: Date.now(),
+        duration,
+        startPosition,
+        endPosition,
+        startTarget,
+        endTarget,
+      };
+    }
+  }, [cameraPreset, camera]);
+
   useFrame(() => {
+    // 카메라 애니메이션 처리
+    const anim = animationRef.current;
+    if (anim && anim.isAnimating && controlsRef.current) {
+      const elapsed = Date.now() - anim.startTime;
+      const progress = Math.min(elapsed / anim.duration, 1);
+      const eased = easeInOutCubic(progress);
+
+      // 카메라 위치 보간
+      camera.position.lerpVectors(anim.startPosition, anim.endPosition, eased);
+
+      // OrbitControls 타겟 보간
+      const target = new THREE.Vector3();
+      target.lerpVectors(anim.startTarget, anim.endTarget, eased);
+      controlsRef.current.target.copy(target);
+      controlsRef.current.update();
+
+      // 애니메이션 완료
+      if (progress >= 1) {
+        animationRef.current = null;
+      }
+      return; // 애니메이션 중에는 줌 아웃 체크 스킵
+    }
+
+    // 줌 아웃 감지
     if (!controlsRef.current || !onZoomOut) return;
 
     const distance = camera.position.length();
@@ -285,7 +368,7 @@ function ZoomAwareControls({ enabled, onZoomOut }: { enabled: boolean; onZoomOut
       minPolarAngle={Math.PI / 8}
       minDistance={30}
       maxDistance={250}
-      enabled={enabled}
+      enabled={enabled && !animationRef.current?.isAnimating}
       target={[0, 0, 0]}
     />
   );

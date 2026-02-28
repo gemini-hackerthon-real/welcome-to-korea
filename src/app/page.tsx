@@ -2,6 +2,8 @@
 
 import { useState, useCallback } from "react";
 import dynamic from "next/dynamic";
+import type { CameraPreset } from "@/types/camera";
+import ScreenshotPanel from "@/components/UI/ScreenshotPanel";
 
 const RealisticMap = dynamic(() => import("@/components/Map3D/RealisticMap"), {
   ssr: false,
@@ -31,6 +33,14 @@ interface District {
   color: string;
 }
 
+// 지역 ID와 District 매핑
+const DISTRICTS: Record<string, District> = {
+  gyeongbokgung: { id: "gyeongbokgung", name: "경복궁", icon: "🏯", color: "#8B4513" },
+  hongdae: { id: "hongdae", name: "홍대", icon: "🎨", color: "#FF6B6B" },
+  itaewon: { id: "itaewon", name: "이태원", icon: "🌙", color: "#9333EA" },
+  gangnam: { id: "gangnam", name: "강남", icon: "🏢", color: "#3B82F6" },
+};
+
 export default function Home() {
   const [currentDistrict, setCurrentDistrict] = useState<District | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -38,6 +48,8 @@ export default function Home() {
   const [messages, setMessages] = useState<{ role: string; text: string }[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [screenshotPanelOpen, setScreenshotPanelOpen] = useState(false);
+  const [cameraPreset, setCameraPreset] = useState<CameraPreset | undefined>(undefined);
 
   const handleDistrictSelect = useCallback((district: District) => {
     setIsTransitioning(true);
@@ -54,9 +66,31 @@ export default function Home() {
       setCurrentDistrict(null);
       setChatOpen(false);
       setMessages([]);
+      setCameraPreset(undefined);
+      setScreenshotPanelOpen(false);
       setTimeout(() => setIsTransitioning(false), 300);
     }, 300);
   }, []);
+
+  // 스크린샷 분석 후 3D 뷰로 점프
+  const handleJumpToView = useCallback((preset: CameraPreset, placeId: string) => {
+    const district = DISTRICTS[placeId];
+    if (!district) return;
+
+    // 현재 지역과 다르면 지역 전환
+    if (!currentDistrict || currentDistrict.id !== placeId) {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentDistrict(district);
+        setMessages([]);
+        setCameraPreset(preset);
+        setTimeout(() => setIsTransitioning(false), 300);
+      }, 300);
+    } else {
+      // 같은 지역이면 카메라만 이동
+      setCameraPreset(preset);
+    }
+  }, [currentDistrict]);
 
   const sendMessage = async () => {
     if (!input.trim() || !currentDistrict) return;
@@ -123,7 +157,7 @@ export default function Home() {
       />
 
       {/* 3D Map */}
-      <RealisticMap district={currentDistrict} onZoomOut={handleBackToMap} />
+      <RealisticMap district={currentDistrict} onZoomOut={handleBackToMap} cameraPreset={cameraPreset} />
 
       {/* Header */}
       <div className="absolute top-4 left-4 z-10">
@@ -169,6 +203,21 @@ export default function Home() {
         </div>
         <p className="text-gray-300 text-sm">{getMascotDescription(currentDistrict.id)}</p>
       </div>
+
+      {/* Screenshot Button */}
+      <button
+        onClick={() => setScreenshotPanelOpen(!screenshotPanelOpen)}
+        className="absolute bottom-4 left-4 z-10 w-14 h-14 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-2xl shadow-lg hover:scale-110 transition-transform"
+      >
+        {screenshotPanelOpen ? "✕" : "📷"}
+      </button>
+
+      {/* Screenshot Panel */}
+      <ScreenshotPanel
+        isOpen={screenshotPanelOpen}
+        onClose={() => setScreenshotPanelOpen(false)}
+        onJumpToView={handleJumpToView}
+      />
 
       {/* Chat Button */}
       <button
