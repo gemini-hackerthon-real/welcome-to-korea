@@ -222,9 +222,6 @@ export default function RealisticMap({ district, onZoomOut, cameraPreset }: Real
 
         {/* 마스코트 */}
         <Mascot district={district} onDragChange={setIsDraggingMascot} />
-
-        {/* 좌표 표시 */}
-        <CoordinateInfo district={district} />
       </Canvas>
 
       {/* 줌 아웃 안내 */}
@@ -1405,18 +1402,6 @@ function BalloonCluster({ position, colors }: { position: [number, number, numbe
         </group>
       ))}
     </group>
-  );
-}
-
-function CoordinateInfo({ district }: { district: District }) {
-  const center = CENTER_COORDS[district.id as keyof typeof CENTER_COORDS];
-
-  return (
-    <Html position={[0, 0.5, -80]} center>
-      <div className="bg-black/60 px-3 py-1 rounded text-white text-xs">
-        중심 좌표: {center?.lat.toFixed(6)}, {center?.lng.toFixed(6)}
-      </div>
-    </Html>
   );
 }
 
