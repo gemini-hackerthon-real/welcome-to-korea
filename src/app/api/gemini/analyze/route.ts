@@ -34,10 +34,10 @@ const VISION_PROMPT = `당신은 서울 관광지 이미지 분석 전문가입�
 
 // 시도할 모델 목록 (fallback 순서)
 const MODELS_TO_TRY = [
+  "gemini-2.5-flash",
+  "gemini-2.5-pro",
   "gemini-2.0-flash",
-  "gemini-2.0-flash-lite-001",
-  "gemini-1.5-flash",
-  "gemini-1.5-pro",
+  "gemini-pro",
 ];
 
 export async function POST(request: NextRequest) {
