@@ -1,12 +1,12 @@
 "use client";
 
 import { useCallback, useState, useRef, useEffect, useMemo } from "react";
-import { GoogleMap, useJsApiLoader, Polygon } from "@react-google-maps/api";
+import { GoogleMap, useJsApiLoader, Polygon, Marker, InfoWindow } from "@react-google-maps/api";
 
-// 서울 중심 좌표
+// 서울 중심 좌표 (4개 지역이 한눈에 보이도록 조정)
 const SEOUL_CENTER = {
-  lat: 37.5665,
-  lng: 126.978,
+  lat: 37.54,
+  lng: 126.98,
 };
 
 // 줌 임계값 - 이 이상 확대하면 3D로 전환
@@ -304,7 +304,7 @@ export default function SeoulMap({ onDistrictSelect, targetLocation }: SeoulMapP
       <GoogleMap
         mapContainerStyle={mapContainerStyle}
         center={SEOUL_CENTER}
-        zoom={12}
+        zoom={13}
         options={mapOptions}
         onLoad={onLoad}
       >
@@ -321,6 +321,38 @@ export default function SeoulMap({ onDistrictSelect, targetLocation }: SeoulMapP
             }}
             onMouseOver={() => setHoveredDistrict(district.id)}
             onMouseOut={() => setHoveredDistrict(null)}
+            onClick={() =>
+              onDistrictSelect({
+                id: district.id,
+                name: district.name,
+                icon: district.icon,
+                color: district.color,
+              })
+            }
+          />
+        ))}
+        {/* 지역 마커 및 라벨 */}
+        {Object.values(DISTRICT_POLYGONS).map((district) => (
+          <Marker
+            key={`marker-${district.id}`}
+            position={district.center}
+            label={{
+              text: `${district.icon} ${district.name}`,
+              color: district.color,
+              fontSize: "14px",
+              fontWeight: "bold",
+              className: "map-marker-label",
+            }}
+            icon={{
+              path: "M12 0C5.4 0 0 5.4 0 12c0 7.2 12 24 12 24s12-16.8 12-24c0-6.6-5.4-12-12-12zm0 18c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6z",
+              scale: 1.8,
+              fillColor: district.color,
+              fillOpacity: 1,
+              strokeColor: "#ffffff",
+              strokeWeight: 2,
+              anchor: new google.maps.Point(12, 36),
+              labelOrigin: new google.maps.Point(12, -15),
+            }}
             onClick={() =>
               onDistrictSelect({
                 id: district.id,
