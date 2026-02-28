@@ -15,7 +15,7 @@ interface District {
 interface RealisticMapProps {
   district: District;
   onZoomOut?: () => void;
-  cameraPreset?: import("@/types/camera").CameraPreset;
+  cameraPreset?: CameraPreset;
 }
 
 // 줌 아웃 임계값 - 이 이상 줌 아웃하면 지도로 전환
@@ -48,31 +48,24 @@ const REAL_LOCATIONS: Record<string, Array<{
   depth?: number;
 }>> = {
   gyeongbokgung: [
-    // 주요 전각
-    { name: "근정전", lat: 37.5796, lng: 126.9770, type: "palace", height: 15, width: 35, depth: 25 },
-    { name: "광화문", lat: 37.5759, lng: 126.9769, type: "gate", height: 12, width: 40, depth: 15 },
-    { name: "경회루", lat: 37.5808, lng: 126.9752, type: "pavilion", height: 10, width: 30, depth: 20 },
-    { name: "향원정", lat: 37.5822, lng: 126.9773, type: "pavilion", height: 8, width: 12, depth: 12 },
-    { name: "근정문", lat: 37.5779, lng: 126.9770, type: "gate", height: 10, width: 25, depth: 10 },
-    { name: "흥례문", lat: 37.5770, lng: 126.9770, type: "gate", height: 8, width: 20, depth: 8 },
-    // 추가 전각들
-    { name: "사정전", lat: 37.5803, lng: 126.9770, type: "palace", height: 12, width: 25, depth: 18 },
-    { name: "강녕전", lat: 37.5810, lng: 126.9770, type: "palace", height: 10, width: 22, depth: 16 },
-    { name: "교태전", lat: 37.5815, lng: 126.9770, type: "palace", height: 10, width: 20, depth: 15 },
-    { name: "자경전", lat: 37.5818, lng: 126.9785, type: "palace", height: 9, width: 18, depth: 14 },
-    { name: "집옥재", lat: 37.5825, lng: 126.9760, type: "pavilion", height: 8, width: 15, depth: 12 },
-    { name: "건청궁", lat: 37.5830, lng: 126.9773, type: "palace", height: 11, width: 24, depth: 18 },
-    // 행각 (회랑)
-    { name: "서행각", lat: 37.5796, lng: 126.9755, type: "corridor", height: 6, width: 8, depth: 80 },
-    { name: "동행각", lat: 37.5796, lng: 126.9785, type: "corridor", height: 6, width: 8, depth: 80 },
-    { name: "북행각", lat: 37.5820, lng: 126.9770, type: "corridor", height: 6, width: 60, depth: 8 },
-    // 주변 문과 건물
-    { name: "영추문", lat: 37.5800, lng: 126.9745, type: "gate", height: 7, width: 12, depth: 8 },
-    { name: "신무문", lat: 37.5835, lng: 126.9770, type: "gate", height: 9, width: 18, depth: 10 },
-    { name: "동십자각", lat: 37.5759, lng: 126.9790, type: "pavilion", height: 8, width: 10, depth: 10 },
-    { name: "서십자각", lat: 37.5759, lng: 126.9750, type: "pavilion", height: 8, width: 10, depth: 10 },
-    // 국립민속박물관
-    { name: "민속박물관", lat: 37.5820, lng: 126.9800, type: "building", height: 14, width: 35, depth: 25 },
+    // 주요 전각 (크기와 위치를 실제 비율에 가깝게 조정)
+    { name: "근정전", lat: 37.5786, lng: 126.9770, type: "palace", height: 18, width: 35, depth: 25 },
+    { name: "광화문", lat: 37.5759, lng: 126.9769, type: "gate", height: 14, width: 40, depth: 15 },
+    { name: "흥례문", lat: 37.5770, lng: 126.9770, type: "gate", height: 12, width: 30, depth: 12 },
+    { name: "근정문", lat: 37.5779, lng: 126.9770, type: "gate", height: 11, width: 25, depth: 10 },
+    { name: "사정전", lat: 37.5796, lng: 126.9770, type: "palace", height: 13, width: 22, depth: 16 },
+    { name: "강녕전", lat: 37.5805, lng: 126.9770, type: "palace", height: 12, width: 24, depth: 18 },
+    { name: "교태전", lat: 37.5812, lng: 126.9770, type: "palace", height: 11, width: 22, depth: 16 },
+    { name: "경회루", lat: 37.5798, lng: 126.9752, type: "pavilion", height: 15, width: 32, depth: 24 },
+    { name: "수정전", lat: 37.5788, lng: 126.9755, type: "palace", height: 10, width: 25, depth: 15 },
+    { name: "자경전", lat: 37.5815, lng: 126.9785, type: "palace", height: 10, width: 20, depth: 15 },
+    { name: "향원정", lat: 37.5825, lng: 126.9773, type: "pavilion", height: 9, width: 10, depth: 10 },
+    { name: "집옥재", lat: 37.5835, lng: 126.9765, type: "pavilion", height: 10, width: 18, depth: 12 },
+    // 행각 (회랑 - 중심축을 따라 배치)
+    { name: "근정전 서행각", lat: 37.5786, lng: 126.9760, type: "corridor", height: 6, width: 5, depth: 40 },
+    { name: "근정전 동행각", lat: 37.5786, lng: 126.9780, type: "corridor", height: 6, width: 5, depth: 40 },
+    // 주변 시설
+    { name: "민속박물관", lat: 37.5815, lng: 126.9800, type: "building", height: 20, width: 30, depth: 30 },
   ],
   itaewon: [
     // 주요 랜드마크
@@ -615,13 +608,13 @@ function RealBuildings({ district }: { district: District }) {
   const center = CENTER_COORDS[district.id as keyof typeof CENTER_COORDS];
   const locations = REAL_LOCATIONS[district.id] || [];
 
-  // 지역별 스케일 조정 (건물 간격을 더 좁게)
+  // 지역별 스케일 조정 (좌표 대비 간격)
   const getScale = (districtId: string) => {
     switch (districtId) {
-      case "gyeongbokgung": return 0.35; // 궁궐은 좀 더 여유있게
-      case "itaewon": return 0.25; // 밀집 상권
+      case "gyeongbokgung": return 0.8; // 궁궐의 실제 배치감을 위해 스케일 조정
+      case "itaewon": return 0.25;
       case "hongdae": return 0.35; // 건물 크기가 커졌으므로 간격 스케일 조정
-      case "gangnam": return 0.22; // 고층빌딩 밀집
+      case "gangnam": return 0.22;
       default: return 0.3;
     }
   };
@@ -635,14 +628,17 @@ function RealBuildings({ district }: { district: District }) {
         const x = pos.x * scale;
         const z = pos.z * scale;
 
+        // 지역별 크기 배율 (경복궁은 1.0으로 실제 비율 유지)
+        const sizeMult = district.id === "gyeongbokgung" ? 1.0 : 1.5;
+
         return (
           <Building
             key={i}
             position={[x, 0, z]}
             size={[
-              (loc.width || 15) * 1.5,
-              (loc.height || 15) * 1.5,
-              (loc.depth || 15) * 1.5,
+              (loc.width || 15) * sizeMult,
+              (loc.height || 15) * sizeMult,
+              (loc.depth || 15) * sizeMult,
             ]}
             type={loc.type}
             name={loc.name}
@@ -707,82 +703,84 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
     const isPavilion = type === "pavilion";
     const isCorridor = type === "corridor";
 
-    // 단청 색상
+    // 단청 및 전통 색상 강화
     const dancheongGreen = "#1a6b4a";
     const dancheongRed = "#b91c1c";
     const dancheongBlue = "#1e40af";
     const dancheongYellow = "#ca8a04";
+    const woodColor = "#5d2e1d"; // 더 어두운 나무 색상
+    const stoneColor = "#78716c"; // 기단 돌 색상
 
     return (
       <group position={position}>
         {/* 2단 기단 (월대) */}
         <mesh position={[0, 0.4, 0]} castShadow receiveShadow>
-          <boxGeometry args={[width + 6, 0.8, depth + 6]} />
-          <meshStandardMaterial color="#9ca3af" />
+          <boxGeometry args={[width + 4, 0.8, depth + 4]} />
+          <meshStandardMaterial color={stoneColor} />
         </mesh>
         <mesh position={[0, 1.2, 0]} castShadow receiveShadow>
-          <boxGeometry args={[width + 4, 0.8, depth + 4]} />
-          <meshStandardMaterial color="#d1d5db" />
+          <boxGeometry args={[width + 2, 0.8, depth + 2]} />
+          <meshStandardMaterial color="#a8a29e" />
         </mesh>
         {/* 기단 계단 */}
         {!isCorridor && (
-          <mesh position={[0, 0.8, depth / 2 + 3]}>
-            <boxGeometry args={[width * 0.4, 1.6, 2]} />
-            <meshStandardMaterial color="#d1d5db" />
+          <mesh position={[0, 0.8, depth / 2 + 2.5]}>
+            <boxGeometry args={[width * 0.4, 1.6, 1.5]} />
+            <meshStandardMaterial color="#a8a29e" />
           </mesh>
         )}
 
-        {/* 기둥들 */}
-        {!isCorridor && Array.from({ length: Math.ceil(width / 6) }).map((_, i) => (
+        {/* 기둥들 (더 굵고 위엄 있게) */}
+        {!isCorridor && Array.from({ length: Math.ceil(width / 5) }).map((_, i) => (
           <group key={`col-${i}`}>
             {/* 전면 기둥 */}
-            <mesh position={[-width / 2 + 2 + i * 6, height / 2 + 1.6, depth / 2 - 1]} castShadow>
-              <cylinderGeometry args={[0.4, 0.5, height - 1, 8]} />
-              <meshStandardMaterial color="#8B0000" />
+            <mesh position={[-width / 2 + 1 + i * 5, height / 2 + 1.2, depth / 2 - 1.2]} castShadow>
+              <cylinderGeometry args={[0.7, 0.7, height, 12]} />
+              <meshStandardMaterial color="#7f1d1d" roughness={0.5} />
             </mesh>
             {/* 후면 기둥 */}
-            <mesh position={[-width / 2 + 2 + i * 6, height / 2 + 1.6, -depth / 2 + 1]} castShadow>
-              <cylinderGeometry args={[0.4, 0.5, height - 1, 8]} />
-              <meshStandardMaterial color="#8B0000" />
+            <mesh position={[-width / 2 + 1 + i * 5, height / 2 + 1.2, -depth / 2 + 1.2]} castShadow>
+              <cylinderGeometry args={[0.7, 0.7, height, 12]} />
+              <meshStandardMaterial color="#7f1d1d" roughness={0.5} />
             </mesh>
           </group>
         ))}
 
-        {/* 본체 벽면 */}
+        {/* 본체 벽면 (따뜻한 석재 색상) */}
         <mesh position={[0, height / 2 + 1.6, 0]} castShadow receiveShadow>
-          <boxGeometry args={[width - 1, height - 1, depth - 1]} />
-          <meshStandardMaterial color="#f5f0e1" />
+          <boxGeometry args={[width - 0.4, height - 0.4, depth - 0.4]} />
+          <meshStandardMaterial color="#d6d3d1" roughness={0.9} />
         </mesh>
 
-        {/* 문/창살 패턴 */}
-        {!isCorridor && Array.from({ length: Math.floor(width / 5) }).map((_, i) => (
-          <mesh key={`door-${i}`} position={[-width / 2 + 3 + i * 5, height / 2 + 1, depth / 2 + 0.1]}>
-            <planeGeometry args={[3, height - 3]} />
-            <meshStandardMaterial color="#4a3728" />
+        {/* 문/창살 패턴 (어두운 나무) */}
+        {!isCorridor && Array.from({ length: Math.floor(width / 4) }).map((_, i) => (
+          <mesh key={`door-${i}`} position={[-width / 2 + 2 + i * 4, height / 2 + 1, depth / 2 + 0.3]}>
+            <planeGeometry args={[2.5, height - 2]} />
+            <meshStandardMaterial color={woodColor} />
           </mesh>
         ))}
 
         {/* 처마 (지붕 밑) */}
         <mesh position={[0, height + 1.5, 0]}>
-          <boxGeometry args={[width + 6, 0.8, depth + 5]} />
-          <meshStandardMaterial color="#2d2d2d" />
+          <boxGeometry args={[width + 4, 0.6, depth + 3]} />
+          <meshStandardMaterial color={dancheongGreen} />
         </mesh>
 
         {/* 단청 장식 - 전면 */}
         <group position={[0, height + 1.2, depth / 2 + 2.4]}>
           {/* 녹색 띠 */}
           <mesh position={[0, 0.3, 0]}>
-            <boxGeometry args={[width + 5, 0.4, 0.15]} />
+            <boxGeometry args={[width + 3, 0.4, 0.15]} />
             <meshStandardMaterial color={dancheongGreen} />
           </mesh>
           {/* 빨간 띠 */}
           <mesh position={[0, 0, 0]}>
-            <boxGeometry args={[width + 5, 0.3, 0.15]} />
+            <boxGeometry args={[width + 3, 0.3, 0.15]} />
             <meshStandardMaterial color={dancheongRed} />
           </mesh>
           {/* 파란 띠 */}
           <mesh position={[0, -0.25, 0]}>
-            <boxGeometry args={[width + 5, 0.2, 0.15]} />
+            <boxGeometry args={[width + 3, 0.2, 0.15]} />
             <meshStandardMaterial color={dancheongBlue} />
           </mesh>
           {/* 황금 문양 포인트 */}
@@ -796,17 +794,17 @@ function Building({ position, size, type, name, districtId }: BuildingProps) {
 
         {/* 단청 - 측면 */}
         {[1, -1].map((side) => (
-          <group key={`side-${side}`} position={[side * (width / 2 + 2.4), height + 1.2, 0]} rotation={[0, Math.PI / 2, 0]}>
-            <mesh position={[0, 0.3, 0]}><boxGeometry args={[depth + 4, 0.4, 0.15]} /><meshStandardMaterial color={dancheongGreen} /></mesh>
-            <mesh position={[0, 0, 0]}><boxGeometry args={[depth + 4, 0.3, 0.15]} /><meshStandardMaterial color={dancheongRed} /></mesh>
-            <mesh position={[0, -0.25, 0]}><boxGeometry args={[depth + 4, 0.2, 0.15]} /><meshStandardMaterial color={dancheongBlue} /></mesh>
+          <group key={`side-${side}`} position={[side * (width / 2 + 2), height + 1.2, 0]} rotation={[0, Math.PI / 2, 0]}>
+            <mesh position={[0, 0.3, 0]}><boxGeometry args={[depth + 3, 0.4, 0.15]} /><meshStandardMaterial color={dancheongGreen} /></mesh>
+            <mesh position={[0, 0, 0]}><boxGeometry args={[depth + 3, 0.3, 0.15]} /><meshStandardMaterial color={dancheongRed} /></mesh>
+            <mesh position={[0, -0.25, 0]}><boxGeometry args={[depth + 3, 0.2, 0.15]} /><meshStandardMaterial color={dancheongBlue} /></mesh>
           </group>
         ))}
 
-        {/* 기와 지붕 */}
-        <mesh position={[0, height + 2.5, 0]} castShadow>
-          <boxGeometry args={[width + 5, 1.5, depth + 4]} />
-          <meshStandardMaterial color="#1f1f1f" />
+        {/* 기와 지붕 (더 짙은 색상) */}
+        <mesh position={[0, height + 2.8, 0]} castShadow>
+          <boxGeometry args={[width + 5, 1.8, depth + 4]} />
+          <meshStandardMaterial color="#1c1917" roughness={0.8} />
         </mesh>
 
         {/* 용마루 (지붕 꼭대기) */}
@@ -1492,7 +1490,9 @@ function Mascot({
 }) {
   const ref = useRef<THREE.Group>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [position, setPosition] = useState<[number, number, number]>([0, 2, 20]);
+  const [position, setPosition] = useState<[number, number, number]>(
+    district.id === "gyeongbokgung" ? [0, 2, 40] : [0, 2, 20]
+  );
   const { camera, raycaster, pointer } = useThree();
 
   useCursor(isDragging);
