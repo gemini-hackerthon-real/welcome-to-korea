@@ -157,7 +157,7 @@ export default function RealisticMap({ district, onZoomOut, cameraPreset }: Real
   return (
     <div className="relative w-full h-full">
       <Canvas
-        camera={{ position: [0, 50, 320], fov: 45 }}
+        camera={{ position: [100, 60, 250], fov: 45 }}
         shadows
       >
         <color attach="background" args={[getBackgroundColor(district.id)]} />
@@ -226,21 +226,6 @@ export default function RealisticMap({ district, onZoomOut, cameraPreset }: Real
         {/* 좌표 표시 */}
         <CoordinateInfo district={district} />
       </Canvas>
-
-      {/* 정보 오버레이 */}
-      <div className="absolute top-20 left-4 bg-black/80 backdrop-blur p-4 rounded-xl text-white max-w-xs border border-white/10">
-        <p className="font-bold text-yellow-400 mb-2 flex items-center gap-2">
-          <span className="text-xl">🗺️</span>
-          실제 좌표 기반 3D
-        </p>
-        <p className="text-gray-300 text-xs leading-relaxed">
-          Google Maps 좌표를 기반으로 실제 위치에
-          <span className="text-yellow-400 font-bold"> 3D 건물</span>을 배치했습니다.
-        </p>
-        <div className="mt-2 pt-2 border-t border-white/10 text-xs text-gray-400">
-          📍 {district.name} ({CENTER_COORDS[district.id as keyof typeof CENTER_COORDS]?.lat.toFixed(4)}, {CENTER_COORDS[district.id as keyof typeof CENTER_COORDS]?.lng.toFixed(4)})
-        </div>
-      </div>
 
       {/* 줌 아웃 안내 */}
       {onZoomOut && (
@@ -1512,7 +1497,7 @@ function Mascot({
   const ref = useRef<THREE.Group>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [position, setPosition] = useState<[number, number, number]>(
-    district.id === "gyeongbokgung" ? [0, 2, 180] : [0, 2, 20]
+    district.id === "gyeongbokgung" ? [45, 2, 145] : [0, 2, 20]
   );
   const { camera, raycaster, pointer } = useThree();
 
@@ -1683,27 +1668,8 @@ function Mascot({
         <sphereGeometry args={[0.25]} />
         <meshStandardMaterial color="#FF6B6B" transparent opacity={0.6} depthTest={false} />
       </mesh>
-
-      <Html position={[0, 5.5, 0]} center>
-        <div className="bg-gradient-to-r from-yellow-400 to-orange-500 px-4 py-2 rounded-full text-white font-bold text-base whitespace-nowrap shadow-lg">
-          {getMascotLabel(district.id)} {isDragging && "✨"}
-        </div>
-      </Html>
     </group>
   );
 }
 
-function getMascotLabel(districtId: string): string {
-  switch (districtId) {
-    case "gyeongbokgung":
-      return "🎎 한복 버디";
-    case "hongdae":
-      return "🎨 아티스트 버디";
-    case "itaewon":
-      return "🎧 DJ 버디";
-    case "gangnam":
-      return "💼 셀럽 버디";
-    default:
-      return "🐥 버디";
-  }
-}
+// getMascotLabel 함수 제거됨
