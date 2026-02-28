@@ -32,6 +32,14 @@ const VISION_PROMPT = `당신은 서울 관광지 이미지 분석 전문가입�
 
 이미지를 분석하고 JSON만 반환하세요.`;
 
+// 시도할 모델 목록 (fallback 순서)
+const MODELS_TO_TRY = [
+  "gemini-2.5-flash",
+  "gemini-2.5-pro",
+  "gemini-2.0-flash-lite-001",
+  "gemini-2.0-flash",
+];
+
 export async function POST(request: NextRequest) {
   try {
     const { imageBase64 } = await request.json();
@@ -52,23 +60,43 @@ export async function POST(request: NextRequest) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     // base64에서 데이터 URL 프리픽스 제거
     const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
 
-    const result = await model.generateContent([
-      VISION_PROMPT,
-      {
-        inlineData: {
-          mimeType: "image/jpeg",
-          data: base64Data,
-        },
-      },
-    ]);
+    let text = "";
+    let lastError: Error | null = null;
 
-    const response = result.response;
-    const text = response.text();
+    // 여러 모델 시도 (fallback)
+    for (const modelName of MODELS_TO_TRY) {
+      try {
+        console.log(`Trying model: ${modelName}`);
+        const model = genAI.getGenerativeModel({ model: modelName });
+
+        const result = await model.generateContent([
+          VISION_PROMPT,
+          {
+            inlineData: {
+              mimeType: "image/jpeg",
+              data: base64Data,
+            },
+          },
+        ]);
+
+        const response = result.response;
+        text = response.text();
+        console.log(`Success with model: ${modelName}`);
+        break; // 성공하면 루프 종료
+      } catch (err) {
+        console.log(`Model ${modelName} failed:`, (err as Error).message);
+        lastError = err as Error;
+        continue; // 다음 모델 시도
+      }
+    }
+
+    if (!text && lastError) {
+      throw lastError;
+    }
 
     // JSON 파싱 (마크다운 코드블록 제거)
     const jsonMatch = text.match(/\{[\s\S]*\}/);
