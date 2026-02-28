@@ -3,7 +3,9 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // 클라이언트 사이드에서는 API 라우트를 통해 호출
-const API_BASE = "/api/gemini";
+const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL 
+  ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/gemini` 
+  : "/api/gemini";
 
 // 텍스트 생성 (POI 설명, 가이드 등)
 export async function generateNarration(prompt: string): Promise<string> {
